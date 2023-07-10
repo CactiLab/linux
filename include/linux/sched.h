@@ -2440,4 +2440,64 @@ static inline void sched_core_fork(struct task_struct *p) { }
 
 extern void sched_set_stop_task(int cpu, struct task_struct *stop);
 
+// GL [DEBUG] +
+static void my_print_keys(char *symbol) {
+	u_int64_t register_value;
+	printk(KERN_INFO "=================keys=================%s\n", symbol);
+	printk(KERN_INFO "current at %lx, PID=%d, PPID=%d CMD=%s\n", current, current->pid, current->real_parent->pid, current->comm);
+	asm volatile ("mrs %0, APGAKeyHi_EL1" : "=r" (register_value));
+	printk(KERN_INFO "APGAKEYHI_EL1 = %lx\n", register_value);
+	asm volatile ("mrs %0, APGAKeyLo_EL1" : "=r" (register_value));
+	printk(KERN_INFO "APGAKEYLO_EL1 = %lx\n", register_value);
+
+	printk(KERN_INFO " ");
+
+	asm volatile ("mrs %0, APIAKeyHi_EL1" : "=r" (register_value));
+	printk(KERN_INFO "APIAKEYHI_EL1 = %lx\n", register_value);
+	asm volatile ("mrs %0, APIAKeyLo_EL1" : "=r" (register_value));
+	printk(KERN_INFO "APIAKEYLO_EL1 = %lx\n", register_value);
+	asm volatile ("mrs %0, APIBKeyHi_EL1" : "=r" (register_value));
+	printk(KERN_INFO "APIBKEYHI_EL1 = %lx\n", register_value);
+	asm volatile ("mrs %0, APIBKeyLo_EL1" : "=r" (register_value));
+	printk(KERN_INFO "APIBKEYLO_EL1 = %lx\n", register_value);
+
+	printk(KERN_INFO " ");
+
+	asm volatile ("mrs %0, APDAKeyHi_EL1" : "=r" (register_value));
+	printk(KERN_INFO "APDAKEYHI_EL1 = %lx\n", register_value);
+	asm volatile ("mrs %0, APDAKeyLo_EL1" : "=r" (register_value));
+	printk(KERN_INFO "APDAKEYLO_EL1 = %lx\n", register_value);
+	asm volatile ("mrs %0, APDBKeyHi_EL1" : "=r" (register_value));
+	printk(KERN_INFO "APDBKEYHI_EL1 = %lx\n", register_value);
+	asm volatile ("mrs %0, APDBKeyLo_EL1" : "=r" (register_value));
+	printk(KERN_INFO "APDBKEYLO_EL1 = %lx\n", register_value);
+
+	printk(KERN_INFO "--------------------------------------");
+
+	printk(KERN_INFO "current->thread.keys_user.apga.hi = %lx", current->thread.keys_user.apga.hi);
+	printk(KERN_INFO "current->thread.keys_user.apga.lo = %lx", current->thread.keys_user.apga.lo);
+
+	printk(KERN_INFO " ");
+	
+	printk(KERN_INFO "current->thread.keys_user.apia.hi = %lx", current->thread.keys_user.apia.hi);
+	printk(KERN_INFO "current->thread.keys_user.apia.lo = %lx", current->thread.keys_user.apia.lo);
+	printk(KERN_INFO "current->thread.keys_user.apib.hi = %lx", current->thread.keys_user.apib.hi);
+	printk(KERN_INFO "current->thread.keys_user.apib.lo = %lx", current->thread.keys_user.apib.lo);
+
+	printk(KERN_INFO " ");
+
+	printk(KERN_INFO "current->thread.keys_user.apda.hi = %lx", current->thread.keys_user.apda.hi);
+	printk(KERN_INFO "current->thread.keys_user.apda.lo = %lx", current->thread.keys_user.apda.lo);
+	printk(KERN_INFO "current->thread.keys_user.apdb.hi = %lx", current->thread.keys_user.apdb.hi);
+	printk(KERN_INFO "current->thread.keys_user.apdb.lo = %lx", current->thread.keys_user.apdb.lo);
+
+	printk(KERN_INFO "--------------------------------------");
+
+	printk(KERN_INFO "current->thread.keys_kernel.apia.hi = %lx", current->thread.keys_kernel.apia.hi);
+	printk(KERN_INFO "current->thread.keys_kernel.apia.lo = %lx", current->thread.keys_kernel.apia.lo);
+
+	printk(KERN_INFO "=================----=================\n");
+}
+//-----
+
 #endif

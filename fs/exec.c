@@ -1811,6 +1811,11 @@ static int exec_binprm(struct linux_binprm *bprm)
 static int bprm_execve(struct linux_binprm *bprm,
 		       int fd, struct filename *filename, int flags)
 {
+	// GL [DEBUG] +
+	printk(KERN_INFO "+++++++++++++++bprm_execve++++++++++");
+	printk(KERN_INFO "current at %lx, PID=%d, PPID=%d CMD=%s\n", current, current->pid, current->real_parent->pid, current->comm);
+	printk(KERN_INFO "============++++++++++++++==========");
+	//-----
 	struct file *file;
 	int retval;
 
@@ -1889,6 +1894,9 @@ static int do_execveat_common(int fd, struct filename *filename,
 			      struct user_arg_ptr envp,
 			      int flags)
 {
+	// GL [DEBUG] +
+	my_print_keys("at beginning of `do_execveat_common`");
+	//-----
 	struct linux_binprm *bprm;
 	int retval;
 
@@ -1961,6 +1969,9 @@ static int do_execveat_common(int fd, struct filename *filename,
 	}
 
 	retval = bprm_execve(bprm, fd, filename, flags);
+	// GL [DEBUG] +
+	my_print_keys("in `do_execveat_common`, after calling `bprm_execve`");
+	//-----
 out_free:
 	free_bprm(bprm);
 
@@ -2110,6 +2121,9 @@ SYSCALL_DEFINE3(execve,
 		const char __user *const __user *, argv,
 		const char __user *const __user *, envp)
 {
+	// GL [DEBUG] +
+	my_print_keys("at the beginning of `execve` syscall");
+	//-----
 	return do_execve(getname(filename), argv, envp);
 }
 
@@ -2119,6 +2133,9 @@ SYSCALL_DEFINE5(execveat,
 		const char __user *const __user *, envp,
 		int, flags)
 {
+	// GL [DEBUG] +
+	my_print_keys("at the beginning of `execveat` syscall");
+	//-----
 	return do_execveat(fd,
 			   getname_uflags(filename, flags),
 			   argv, envp, flags);
@@ -2129,6 +2146,9 @@ COMPAT_SYSCALL_DEFINE3(execve, const char __user *, filename,
 	const compat_uptr_t __user *, argv,
 	const compat_uptr_t __user *, envp)
 {
+	// GL [DEBUG] +
+	my_print_keys("at the beginning of `execve` syscall");
+	//-----
 	return compat_do_execve(getname(filename), argv, envp);
 }
 
@@ -2138,6 +2158,9 @@ COMPAT_SYSCALL_DEFINE5(execveat, int, fd,
 		       const compat_uptr_t __user *, envp,
 		       int,  flags)
 {
+	// GL [DEBUG] +
+	my_print_keys("at the beginning of `execveat` syscall");
+	//-----
 	return compat_do_execveat(fd,
 				  getname_uflags(filename, flags),
 				  argv, envp, flags);

@@ -2910,6 +2910,28 @@ pid_t kernel_clone(struct kernel_clone_args *args)
 	}
 
 	p = copy_process(NULL, trace, NUMA_NO_NODE, args);
+	// GL [DEBUG] +
+	my_print_keys("in `kernel_clone`, after calling `copy_process`");
+	printk(KERN_INFO "--------------------------------------------");
+	printk(KERN_INFO "Child created: task_struct is at %lx, PID=%d, CMD=%s\n", p, p->pid, p->comm);
+	printk(KERN_INFO "Keys in child `task_struct->thread`:");
+	printk(KERN_INFO "p->thread.keys_user.apga.hi = %lx", p->thread.keys_user.apga.hi);
+	printk(KERN_INFO "p->thread.keys_user.apga.lo = %lx", p->thread.keys_user.apga.lo);
+	printk(KERN_INFO " ");
+	printk(KERN_INFO "p->thread.keys_user.apia.hi = %lx", p->thread.keys_user.apia.hi);
+	printk(KERN_INFO "p->thread.keys_user.apia.lo = %lx", p->thread.keys_user.apia.lo);
+	printk(KERN_INFO "p->thread.keys_user.apib.hi = %lx", p->thread.keys_user.apib.hi);
+	printk(KERN_INFO "p->thread.keys_user.apib.lo = %lx", p->thread.keys_user.apib.lo);
+	printk(KERN_INFO " ");
+	printk(KERN_INFO "p->thread.keys_user.apda.hi = %lx", p->thread.keys_user.apda.hi);
+	printk(KERN_INFO "p->thread.keys_user.apda.lo = %lx", p->thread.keys_user.apda.lo);
+	printk(KERN_INFO "p->thread.keys_user.apdb.hi = %lx", p->thread.keys_user.apdb.hi);
+	printk(KERN_INFO "p->thread.keys_user.apdb.lo = %lx", p->thread.keys_user.apdb.lo);
+	printk(KERN_INFO "--------------------------------------");
+	printk(KERN_INFO "p->thread.keys_kernel.apia.hi = %lx", p->thread.keys_kernel.apia.hi);
+	printk(KERN_INFO "p->thread.keys_kernel.apia.lo = %lx", p->thread.keys_kernel.apia.lo);
+	printk(KERN_INFO "============================================");
+	//-----
 	add_latent_entropy();
 
 	if (IS_ERR(p))
@@ -2993,6 +3015,9 @@ pid_t user_mode_thread(int (*fn)(void *), void *arg, unsigned long flags)
 #ifdef __ARCH_WANT_SYS_FORK
 SYSCALL_DEFINE0(fork)
 {
+	// GL [DEBUG] +
+	my_print_keys("at the beginning of `fork` syscall");
+	//-----
 #ifdef CONFIG_MMU
 	struct kernel_clone_args args = {
 		.exit_signal = SIGCHLD,
@@ -3009,6 +3034,9 @@ SYSCALL_DEFINE0(fork)
 #ifdef __ARCH_WANT_SYS_VFORK
 SYSCALL_DEFINE0(vfork)
 {
+	// GL [DEBUG] +
+	my_print_keys("at the beginning of `vfork` syscall");
+	//-----
 	struct kernel_clone_args args = {
 		.flags		= CLONE_VFORK | CLONE_VM,
 		.exit_signal	= SIGCHLD,
@@ -3042,6 +3070,9 @@ SYSCALL_DEFINE5(clone, unsigned long, clone_flags, unsigned long, newsp,
 		 unsigned long, tls)
 #endif
 {
+	// GL [DEBUG] +
+	my_print_keys("at the beginning of `clone` syscall");
+	//-----
 	struct kernel_clone_args args = {
 		.flags		= (lower_32_bits(clone_flags) & ~CSIGNAL),
 		.pidfd		= parent_tidptr,

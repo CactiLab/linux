@@ -32,9 +32,15 @@ static __always_inline void boot_init_stack_canary(void)
 	if (!IS_ENABLED(CONFIG_STACKPROTECTOR_PER_TASK))
 		__stack_chk_guard = current->stack_canary;
 #endif
+	// GL [DEBUG] +
+	my_print_keys("in boot_init_stack_canary before ptrauth_thread_init_kernel");
+	//-----
 	ptrauth_thread_init_kernel(current);
 	ptrauth_thread_switch_kernel(current);
 	ptrauth_enable();
+	// GL [DEBUG] +
+	my_print_keys("in boot_init_stack_canary after ptrauth_enable");
+	//-----
 }
 
 #endif	/* _ASM_STACKPROTECTOR_H */
