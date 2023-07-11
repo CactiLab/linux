@@ -13,6 +13,10 @@
 	mov	\tmp1, #THREAD_KEYS_KERNEL
 	add	\tmp1, \tsk, \tmp1
 	ldp	\tmp2, \tmp3, [\tmp1, #PTRAUTH_KERNEL_KEY_APIA]
+	// GL [DEBUG] +
+	// mov \tmp2, #1
+	// mov \tmp3, #1
+	//-----
 	msr_s	SYS_APIAKEYLO_EL1, \tmp2
 	msr_s	SYS_APIAKEYHI_EL1, \tmp3
 	.endm

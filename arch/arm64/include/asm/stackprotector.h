@@ -36,6 +36,10 @@ static __always_inline void boot_init_stack_canary(void)
 	my_print_keys("in boot_init_stack_canary before ptrauth_thread_init_kernel");
 	//-----
 	ptrauth_thread_init_kernel(current);
+	// GL [DEBUG] +
+	// current->thread.keys_kernel.apia.hi = 1;
+	// current->thread.keys_kernel.apia.lo = 1;
+	//-----
 	ptrauth_thread_switch_kernel(current);
 	ptrauth_enable();
 	// GL [DEBUG] +
