@@ -2913,23 +2913,27 @@ pid_t kernel_clone(struct kernel_clone_args *args)
 	// GL [DEBUG] +
 	my_print_keys("in `kernel_clone`, after calling `copy_process`");
 	printk(KERN_INFO "--------------------------------------------");
-	printk(KERN_INFO "Child created: task_struct is at %lx, PID=%d, CMD=%s\n", p, p->pid, p->comm);
-	printk(KERN_INFO "Keys in child `task_struct->thread`:");
-	printk(KERN_INFO "p->thread.keys_user.apga.hi = %lx", p->thread.keys_user.apga.hi);
-	printk(KERN_INFO "p->thread.keys_user.apga.lo = %lx", p->thread.keys_user.apga.lo);
-	printk(KERN_INFO " ");
-	printk(KERN_INFO "p->thread.keys_user.apia.hi = %lx", p->thread.keys_user.apia.hi);
-	printk(KERN_INFO "p->thread.keys_user.apia.lo = %lx", p->thread.keys_user.apia.lo);
-	printk(KERN_INFO "p->thread.keys_user.apib.hi = %lx", p->thread.keys_user.apib.hi);
-	printk(KERN_INFO "p->thread.keys_user.apib.lo = %lx", p->thread.keys_user.apib.lo);
-	printk(KERN_INFO " ");
-	printk(KERN_INFO "p->thread.keys_user.apda.hi = %lx", p->thread.keys_user.apda.hi);
-	printk(KERN_INFO "p->thread.keys_user.apda.lo = %lx", p->thread.keys_user.apda.lo);
-	printk(KERN_INFO "p->thread.keys_user.apdb.hi = %lx", p->thread.keys_user.apdb.hi);
-	printk(KERN_INFO "p->thread.keys_user.apdb.lo = %lx", p->thread.keys_user.apdb.lo);
-	printk(KERN_INFO "--------------------------------------");
-	printk(KERN_INFO "p->thread.keys_kernel.apia.hi = %lx", p->thread.keys_kernel.apia.hi);
-	printk(KERN_INFO "p->thread.keys_kernel.apia.lo = %lx", p->thread.keys_kernel.apia.lo);
+	if (likely(p)) {
+		printk(KERN_INFO "Child created: task_struct is at %lx, PID=%d, CMD=%s\n", p, p->pid, p->comm);
+		printk(KERN_INFO "Keys in child `task_struct->thread`:");
+		printk(KERN_INFO "p->thread.keys_user.apga.hi = %lx", p->thread.keys_user.apga.hi);
+		printk(KERN_INFO "p->thread.keys_user.apga.lo = %lx", p->thread.keys_user.apga.lo);
+		printk(KERN_INFO " ");
+		printk(KERN_INFO "p->thread.keys_user.apia.hi = %lx", p->thread.keys_user.apia.hi);
+		printk(KERN_INFO "p->thread.keys_user.apia.lo = %lx", p->thread.keys_user.apia.lo);
+		printk(KERN_INFO "p->thread.keys_user.apib.hi = %lx", p->thread.keys_user.apib.hi);
+		printk(KERN_INFO "p->thread.keys_user.apib.lo = %lx", p->thread.keys_user.apib.lo);
+		printk(KERN_INFO " ");
+		printk(KERN_INFO "p->thread.keys_user.apda.hi = %lx", p->thread.keys_user.apda.hi);
+		printk(KERN_INFO "p->thread.keys_user.apda.lo = %lx", p->thread.keys_user.apda.lo);
+		printk(KERN_INFO "p->thread.keys_user.apdb.hi = %lx", p->thread.keys_user.apdb.hi);
+		printk(KERN_INFO "p->thread.keys_user.apdb.lo = %lx", p->thread.keys_user.apdb.lo);
+		printk(KERN_INFO "--------------------------------------");
+		printk(KERN_INFO "p->thread.keys_kernel.apia.hi = %lx", p->thread.keys_kernel.apia.hi);
+		printk(KERN_INFO "p->thread.keys_kernel.apia.lo = %lx", p->thread.keys_kernel.apia.lo);
+	} else {
+		printk(KERN_INFO "Warning: after calling `copy_process`, p is NULL");
+	}
 	printk(KERN_INFO "============================================");
 	//-----
 	add_latent_entropy();
