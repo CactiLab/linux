@@ -19,6 +19,13 @@
 	//-----
 	msr_s	SYS_APIAKEYLO_EL1, \tmp2
 	msr_s	SYS_APIAKEYHI_EL1, \tmp3
+	// GL [PAGA_1] +
+#ifdef CONFIG_ARM64_PTR_AUTH_KERNEL_PAGA
+	ldp	\tmp2, \tmp3, [\tmp1, #PTRAUTH_KERNEL_KEY_APGA]
+	msr_s	SYS_APGAKEYLO_EL1, \tmp2
+	msr_s	SYS_APGAKEYHI_EL1, \tmp3
+#endif
+	//-----
 	.endm
 
 	.macro ptrauth_keys_install_kernel_nosync tsk, tmp1, tmp2, tmp3
@@ -59,6 +66,13 @@ alternative_else_nop_endif
 	ldp	\tmp2, \tmp3, [\tmp1, #PTRAUTH_USER_KEY_APIA]
 	msr_s	SYS_APIAKEYLO_EL1, \tmp2
 	msr_s	SYS_APIAKEYHI_EL1, \tmp3
+	// GL [PAGA_1] +
+#ifdef CONFIG_ARM64_PTR_AUTH_KERNEL_PAGA
+	ldp	\tmp2, \tmp3, [\tmp1, #PTRAUTH_KERNEL_KEY_APGA]
+	msr_s	SYS_APGAKEYLO_EL1, \tmp2
+	msr_s	SYS_APGAKEYHI_EL1, \tmp3
+#endif
+	//-----
 	.endm
 
 	.macro __ptrauth_keys_init_cpu tsk, tmp1, tmp2, tmp3

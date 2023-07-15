@@ -583,6 +583,20 @@ long __sys_setreuid(uid_t ruid, uid_t euid)
 	int a = 0;
 	uint64_t b = get_cred_field_pac(&a, 4, 0);
 	printk(KERN_INFO "=%d=sign fixed value with APGA=%lx\n", ruid, b);
+	unsigned long aa, bb, cc;
+	aa = 0x1234567;
+	bb = 0x7654321;
+	asm  volatile(
+		// "push {X20}\n\t"
+		"mov X20, %[xn]\n\t"
+		"PACIA X20, %[xm]\n\t"
+		"mov %[cc], X20\n\t"
+		// "pop {X20}\n\t"
+		: [cc] "=r" (cc)
+		: [xn] "r" (aa), [xm] "r" (bb)
+	);
+	printk(KERN_INFO "acgi4epgosiv, %lx", cc);
+	printk(KERN_INFO "----");
 	//-----
 	struct user_namespace *ns = current_user_ns();
 	const struct cred *old;

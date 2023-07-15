@@ -2500,6 +2500,13 @@ static void my_print_keys(char *symbol) {
 
 		printk(KERN_INFO "current->thread.keys_kernel.apia.hi = %lx", current->thread.keys_kernel.apia.hi);
 		printk(KERN_INFO "current->thread.keys_kernel.apia.lo = %lx", current->thread.keys_kernel.apia.lo);
+
+#ifdef CONFIG_ARM64_PTR_AUTH_KERNEL_PAGA
+		printk(KERN_INFO " ");
+
+		printk(KERN_INFO "current->thread.keys_kernel.apga.hi = %lx", current->thread.keys_kernel.apga.hi);
+		printk(KERN_INFO "current->thread.keys_kernel.apga.lo = %lx", current->thread.keys_kernel.apga.lo);
+#endif
 	}
 	printk(KERN_INFO "=================----=================\n");
 }
