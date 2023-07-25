@@ -1925,6 +1925,13 @@ config ARM64_PTR_AUTH_KERNEL_PAGA
 	  When enabled, PAGA key will be added to pointer authentication for kerenl, 
 	  like PAIA key.
 
+config ARM64_PTR_AUTH_CRED_PROTECT
+	bool "Use PA to protect cred structure"
+	default n
+	depends on ARM64_PTR_AUTH_KERNEL
+	help
+	  When enabled, the cred structure will be protected by PA.
+
 config CC_HAS_BRANCH_PROT_PAC_RET
 	# GCC 9 or later, clang 8 or later
 	def_bool $(cc-option,-mbranch-protection=pac-ret+leaf)
