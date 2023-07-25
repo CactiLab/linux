@@ -2442,6 +2442,7 @@ extern void sched_set_stop_task(int cpu, struct task_struct *stop);
 
 // GL [DEBUG] +
 static void my_print_keys(char *symbol) {
+	/*
 	u_int64_t register_value;
 	printk(KERN_INFO "=================keys=================%s\n", symbol);
 	if (likely(current)) {
@@ -2509,6 +2510,7 @@ static void my_print_keys(char *symbol) {
 #endif
 	}
 	printk(KERN_INFO "=================----=================\n");
+	*/
 }
 //-----
 

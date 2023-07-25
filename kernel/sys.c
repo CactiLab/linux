@@ -579,25 +579,50 @@ static inline __attribute__((always_inline)) u_int64_t get_cred_field_pac(const 
 long __sys_setreuid(uid_t ruid, uid_t euid)
 {
 	// GL [DEBUG] +
-	my_print_keys("at the beginning of __sys_setreuid");
-	int a = 0;
-	uint64_t b = get_cred_field_pac(&a, 4, 0);
-	printk(KERN_INFO "=%d=sign fixed value with APGA=%lx\n", ruid, b);
-	unsigned long aa, bb, cc;
-	aa = 0x1234567;
-	bb = 0x7654321;
-	asm  volatile(
-		// "push {X20}\n\t"
-		"mov X20, %[xn]\n\t"
-		"PACIA X20, %[xm]\n\t"
-		"mov %[cc], X20\n\t"
-		// "pop {X20}\n\t"
-		: [cc] "=r" (cc)
-		: [xn] "r" (aa), [xm] "r" (bb)
-	);
-	printk(KERN_INFO "acgi4epgosiv, %lx", cc);
-	printk(KERN_INFO "----");
+	// my_print_keys("at the beginning of __sys_setreuid");
+	// u_int64_t register_value = 0x07;
+	// asm volatile ("mrs %0, CNTPS_CTL_EL1" : "=r" (register_value));
+	// printk(KERN_INFO "CNTPS_CTL_EL1 = %lx\n", register_value);
+	// asm volatile ("mrs %0, ACCDATA_EL1" : "=r" (register_value));
+	// printk(KERN_INFO "ACCDATA_EL1 = %lx\n", register_value);
+	// asm volatile ("mrs %0, DBGPRCR_EL1" : "=r" (register_value));
+	// printk(KERN_INFO "DBGPRCR_EL1 = %lx\n", register_value);
+
+	// asm volatile ("mrs %0, ACTLR_EL1" : "=r" (register_value));
+	// printk(KERN_INFO "ACTLR_EL1 = %lx\n", register_value);
+
+	// asm volatile ("msr ID_AA64AFR1_EL1, %0" : "=r" (register_value));
+
+	// asm volatile ("mrs %0, ID_AA64AFR1_EL1" : "=r" (register_value));
+	// printk(KERN_INFO "ID_AA64AFR1_EL1 = %lx\n", register_value);
+	
+	// int a = 0;
+	// uint64_t b = get_cred_field_pac(&a, 4, 0);
+	// printk(KERN_INFO "=%d=sign fixed value with APGA=%lx\n", ruid, b);
+	// unsigned long aa, bb, cc;
+	// aa = 0x1234567;
+	// bb = 0x7654321;
+	// asm  volatile(
+	// 	// "push {X20}\n\t"
+	// 	"mov X20, %[xn]\n\t"
+	// 	"PACIA X20, %[xm]\n\t"
+	// 	"mov %[cc], X20\n\t"
+	// 	// "pop {X20}\n\t"
+	// 	: [cc] "=r" (cc)
+	// 	: [xn] "r" (aa), [xm] "r" (bb)
+	// );
+	// printk(KERN_INFO "acgi4epgosiv, %lx", cc);
+	// printk(KERN_INFO "----");
 	//-----
+
+	// GL
+	printk(KERN_INFO "+");
+	printk(KERN_INFO "At the beginning of __sys_setreuid");
+	printk(KERN_INFO "Address of current_cred: %lx", current_cred());
+	printk(KERN_INFO "-");
+	// get_cred_field_pac(NULL, 0, 0);
+	//-----
+
 	struct user_namespace *ns = current_user_ns();
 	const struct cred *old;
 	struct cred *new;

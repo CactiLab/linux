@@ -869,6 +869,10 @@ static void __init print_unknown_bootoptions(void)
 asmlinkage __visible __init __no_sanitize_address __noreturn __no_stack_protector
 void start_kernel(void)
 {
+	// GL [DEBUG] +
+	printk(KERN_INFO "start_kernel 1 current at %lx, PID=%d, PPID=%d CMD=%s\n", current, current->pid, current->real_parent->pid, current->comm);
+	printk(KERN_INFO "start_kernel 1, cred %lx", current->cred);
+	//-----
 	char *command_line;
 	char *after_dashes;
 
@@ -985,7 +989,10 @@ void start_kernel(void)
 	/* These make use of the fully initialized rng */
 	kfence_init();
 	boot_init_stack_canary();
-
+	// GL [DEBUG] +
+	printk(KERN_INFO "start_kernel current at %lx, PID=%d, PPID=%d CMD=%s\n", current, current->pid, current->real_parent->pid, current->comm);
+	printk(KERN_INFO "start_kernel, cred %lx", current->cred);
+	//-----
 	perf_event_init();
 	profile_init();
 	call_function_init();

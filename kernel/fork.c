@@ -2911,6 +2911,7 @@ pid_t kernel_clone(struct kernel_clone_args *args)
 
 	p = copy_process(NULL, trace, NUMA_NO_NODE, args);
 	// GL [DEBUG] +
+	/*
 	my_print_keys("in `kernel_clone`, after calling `copy_process`");
 	printk(KERN_INFO "--------------------------------------------");
 	if (likely(p)) {
@@ -2935,6 +2936,7 @@ pid_t kernel_clone(struct kernel_clone_args *args)
 		printk(KERN_INFO "Warning: after calling `copy_process`, p is NULL");
 	}
 	printk(KERN_INFO "============================================");
+	*/
 	//-----
 	add_latent_entropy();
 
