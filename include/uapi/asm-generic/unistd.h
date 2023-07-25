@@ -820,8 +820,16 @@ __SYSCALL(__NR_set_mempolicy_home_node, sys_set_mempolicy_home_node)
 #define __NR_cachestat 451
 __SYSCALL(__NR_cachestat, sys_cachestat)
 
+// GL [DEBUG] +
+#define __NR_mytestsyscall 452
+__SYSCALL(__NR_mytestsyscall, sys_mytestsyscall)
+// -----
+
 #undef __NR_syscalls
-#define __NR_syscalls 452
+// Gl [DEBUG] +
+// #define __NR_syscalls 452
+#define __NR_syscalls 453
+//-----
 
 /*
  * 32 bit systems traditionally used different

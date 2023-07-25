@@ -2980,3 +2980,13 @@ COMPAT_SYSCALL_DEFINE1(sysinfo, struct compat_sysinfo __user *, info)
 	return 0;
 }
 #endif /* CONFIG_COMPAT */
+
+// GL [DEBUG] +
+SYSCALL_DEFINE0(mytestsyscall) {
+	printk(KERN_INFO "+");
+	printk(KERN_INFO "This is my first system call.");
+	printk(KERN_INFO "+");
+	printk(KERN_INFO "+");
+	return 0;
+}
+//-----
