@@ -264,6 +264,15 @@ struct cred *prepare_creds(void)
 	kdebug("prepare_creds() alloc %p", new);
 
 	old = task->cred;
+	// GL
+	printk(KERN_INFO "+");
+	printk(KERN_INFO "In prepare_creds:...");
+	printk(KERN_INFO "current at %lx, PID=%d, PPID=%d CMD=%s\n", current, current->pid, current->real_parent->pid, current->comm);
+	printk(KERN_INFO "current cred at %lx", current_cred());
+	printk(KERN_INFO "cred old: %lx", old);
+	printk(KERN_INFO "cred new: %lx", new);
+	printk(KERN_INFO "-");
+	//-----
 	memcpy(new, old, sizeof(struct cred));
 
 	new->non_rcu = 0;
@@ -446,6 +455,14 @@ static bool cred_cap_issubset(const struct cred *set, const struct cred *subset)
  */
 int commit_creds(struct cred *new)
 {
+	// GL
+	printk(KERN_INFO "+");
+	printk(KERN_INFO "At the beginning of commit_creds:...");
+	printk(KERN_INFO "current at %lx, PID=%d, PPID=%d CMD=%s\n", current, current->pid, current->real_parent->pid, current->comm);
+	printk(KERN_INFO "current cred at %lx", current_cred());
+	printk(KERN_INFO "argument new (cred to be installed) is at %lx", new);
+	printk(KERN_INFO "-");
+	//-----
 	struct task_struct *task = current;
 	const struct cred *old = task->real_cred;
 
@@ -519,6 +536,13 @@ int commit_creds(struct cred *new)
 	/* release the old obj and subj refs both */
 	put_cred(old);
 	put_cred(old);
+	// GL
+	printk(KERN_INFO "+");
+	printk(KERN_INFO "At the end of commit_creds:...");
+	printk(KERN_INFO "current at %lx, PID=%d, PPID=%d CMD=%s\n", current, current->pid, current->real_parent->pid, current->comm);
+	printk(KERN_INFO "current cred at %lx", current_cred());
+	printk(KERN_INFO "-");
+	//-----
 	return 0;
 }
 EXPORT_SYMBOL(commit_creds);
@@ -553,6 +577,9 @@ EXPORT_SYMBOL(abort_creds);
  */
 const struct cred *override_creds(const struct cred *new)
 {
+	// GL
+	printk(KERN_INFO "At the beginning of override_creds");
+	//-----
 	const struct cred *old = current->cred;
 
 	kdebug("override_creds(%p{%d,%d})", new,
@@ -574,6 +601,9 @@ const struct cred *override_creds(const struct cred *new)
 	 * on the validation in 'get_cred()'.
 	 */
 	get_new_cred((struct cred *)new);
+	// GL
+	printk(KERN_INFO "In override_creds, after get_new_cred");
+	//-----
 	alter_cred_subscribers(new, 1);
 	rcu_assign_pointer(current->cred, new);
 	alter_cred_subscribers(old, -1);
@@ -683,11 +713,153 @@ int set_cred_ucounts(struct cred *new)
 	return 0;
 }
 
+// GL [code] +
+#ifdef CONFIG_ARM64_PAUTH_CRED_SAC
+/**
+ * get_cred_field_pac - Calculate pointer authentication code using ARMv8.3a PACGA instruction
+ * 
+ * @field_pointer The pointer to the input data
+ * @field_size The size of the data in byte, greater than 0
+ * @xm The initial value for context of PACGA instruction
+ * 
+ * This function is only for get_cred_sac, don't call it anywhere else.
+ * 
+ * Let the token "xn" be the input data for PACGA, xn is 64 bits.
+ * If field_size is 8, the data is 64 bits, perfect for PACGA.
+ * If field_size is less than 8, pad 0 for the most significant bits of xn.
+ * If field_size is greater than 8, use PACGA multiple times, 8 bytes by 8 bytees.
+ * In this case, the initial context is xm, the context for the next PACGA would be 
+ * the result of the previous PACGA instruction.
+ * 
+ * Return pointer authentication code in 64 bits. The higher 32 bits are the PAC,
+ * the lower 32 bits will always be 0. This is the raw data calculated by PACGA.
+*/
+static inline __attribute__((always_inline)) u_int64_t get_cred_field_pac(const void *field_pointer, size_t field_size, u_int64_t xm) {
+	if (field_size <= 0) {
+		return 0;
+	}
+
+	/* For copying data byte by byte */
+	char *field = (char *) field_pointer;
+	/* Loop control variable */
+	size_t total_chunk_size = 0;
+	/* Final result */
+	u_int64_t xd;
+	/* Input data for PACGA */
+	u_int64_t xn;
+	/* Temporary variable */
+	u_int64_t t;
+
+	/* The number of loop is ceil(field_size / 8) */
+	while (total_chunk_size < field_size) {
+		size_t current_chunk_size = (field_size - total_chunk_size >= 8) ? 8 : field_size - total_chunk_size;
+		xn = 0L;
+
+		/* copy data to the variable xn */
+		int i = 0;
+		for (; i < current_chunk_size; ++i) {
+			t = (u_int64_t) (*(field + i));
+			xn |= t << (8 * i);
+		}
+
+		/* PACGA instruction is for ARMv8.3a
+		 * variable xn and xm will be the input operators for PACGA
+		 * variable xd takes the result
+		 */
+		asm volatile(
+			"PACGA %[out], %[val], %[context]\n\t"
+			: [out] "=r" (xd)
+			: [val] "r" (xn), [context] "r" (xm)
+			:
+		);
+		// printk(KERN_INFO "---------------------\n");
+		// printk(KERN_INFO "xn = %lx, xm = %lx, xd = %lx\n", xn, xm, xd);
+		// printk(KERN_INFO "---------------------\n");
+		total_chunk_size += 8;
+		field += 8;
+		xm = xd;
+	}
+	return xd;
+}
+
+/**
+ * get_cred_sac - Calculate structure authentication code (SAC) for struct cred
+ * 
+ * @cred The pointer to the cred structure, it won't be changed
+ * 
+ * Only some fields of struct cred will be used for calculating SAC.
+ * The initial value of context of PACGA is the address of cred.
+ * The previous result of PACGA will be the context for the next PACGA.
+ * 
+ * Return the 32 bits of SAC
+*/
+static inline __attribute__((always_inline)) u_int32_t get_cred_sac(const struct cred *cred) {
+	
+	u_int64_t xm = (u_int64_t) cred;
+
+	xm = get_cred_field_pac(&cred->uid, sizeof(cred->uid), xm);
+	xm = get_cred_field_pac(&cred->gid, sizeof(cred->gid), xm);
+	xm = get_cred_field_pac(&cred->suid, sizeof(cred->suid), xm);
+	xm = get_cred_field_pac(&cred->sgid, sizeof(cred->sgid), xm);
+	xm = get_cred_field_pac(&cred->euid, sizeof(cred->euid), xm);
+	xm = get_cred_field_pac(&cred->egid, sizeof(cred->egid), xm);
+	xm = get_cred_field_pac(&cred->fsuid, sizeof(cred->fsuid), xm);
+	xm = get_cred_field_pac(&cred->fsgid, sizeof(cred->fsgid), xm);
+	xm = get_cred_field_pac(&cred->securebits, sizeof(cred->securebits), xm);
+	xm = get_cred_field_pac(&cred->cap_inheritable, sizeof(cred->cap_inheritable), xm);
+	xm = get_cred_field_pac(&cred->cap_permitted, sizeof(cred->cap_permitted), xm);
+	xm = get_cred_field_pac(&cred->cap_effective, sizeof(cred->cap_effective), xm);
+	xm = get_cred_field_pac(&cred->cap_bset, sizeof(cred->cap_bset), xm);
+	xm = get_cred_field_pac(&cred->cap_ambient, sizeof(cred->cap_ambient), xm);
+	xm = get_cred_field_pac(&cred->user, sizeof(cred->user), xm);
+	xm = get_cred_field_pac(&cred->user_ns, sizeof(cred->user_ns), xm);
+	xm = get_cred_field_pac(&cred->ucounts, sizeof(cred->ucounts), xm);
+	xm = get_cred_field_pac(&cred->group_info, sizeof(cred->group_info), xm);
+	xm = get_cred_field_pac(&cred->rcu, sizeof(cred->rcu), xm);
+	
+	return xm >> 32;
+}
+
+/**
+ * sac_sign_cred - Sign a cred structure
+ * 
+ * @cred is the point to the credential structure
+ * 
+ * Nothing will return, but the "sac" filed in cred will be changd
+*/
+inline __attribute__((always_inline)) void sac_sign_cred(struct cred *cred) {
+	u_int32_t sac = get_cred_sac(cred);
+	cred -> sac = sac;
+}
+
+/**
+ * sac_validate_cred - Validate the SAC of a cred structure
+ * 
+ * @cred is the point to the credential structure, it won't be changed
+ * 
+ * Calculate the SAC again.
+ * 
+ * Return the address of cred if matched; kerenl panic will be triggered if not mathced
+*/
+inline __attribute__((always_inline)) struct cred * sac_validate_cred(const struct cred *cred) {
+	u_int32_t sac = get_cred_sac(cred);
+	if (cred -> sac == sac)
+		return cred;
+	panic("Cred struct (%p) integirty check failed\n", cred);
+}
+#endif
+//-----
+
 /*
  * initialise the credentials stuff
  */
 void __init cred_init(void)
 {
+	// GL [DEBUG] +
+	printk(KERN_INFO "cred_init current at %lx, PID=%d, PPID=%d CMD=%s\n", current, current->pid, current->real_parent->pid, current->comm);
+	printk(KERN_INFO "cred_init, cred %lx", current->cred);
+	printk(KERN_INFO "&init_cred %lx", init_cred);
+	//-----
 	/* allocate a slab in which we can store credentials */
 	cred_jar = kmem_cache_create("cred_jar", sizeof(struct cred), 0,
 			SLAB_HWCACHE_ALIGN|SLAB_PANIC|SLAB_ACCOUNT, NULL);

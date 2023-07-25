@@ -150,6 +150,11 @@ struct cred {
 		int non_rcu;			/* Can we skip RCU deletion? */
 		struct rcu_head	rcu;		/* RCU deletion hook */
 	};
+	// GL [code] +
+#ifdef CONFIG_ARM64_PAUTH_CRED_SAC
+	u_int32_t sac;				/* store the structure authentication code (SAC) of this cred structure */
+#endif
+	//-----
 } __randomize_layout;
 
 extern void __put_cred(struct cred *);
@@ -171,6 +176,20 @@ extern int set_create_files_as(struct cred *, struct inode *);
 extern int cred_fscmp(const struct cred *, const struct cred *);
 extern void __init cred_init(void);
 extern int set_cred_ucounts(struct cred *);
+// GL [code] +
+#ifdef CONFIG_ARM64_PAUTH_CRED_SAC
+static inline __attribute__((always_inline)) void sac_sign_cred(struct cred *);
+static inline __attribute__((always_inline)) struct cred * sac_validate_cred(const struct cred *);
+#else
+static inline __attribute__((always_inline)) void sac_sign_cred(struct cred *) {
+
+}
+
+static inline __attribute__((always_inline)) struct cred * sac_validate_cred(const struct cred *) {
+
+}
+#endif
+//-----
 
 /*
  * check for validity of credentials
@@ -247,6 +266,7 @@ static inline struct cred *get_new_cred(struct cred *cred)
  */
 static inline const struct cred *get_cred(const struct cred *cred)
 {
+	printk(KERN_INFO "get_cred current at %lx, PID=%d, PPID=%d CMD=%s\n", current, current->pid, current->real_parent->pid, current->comm);
 	struct cred *nonconst_cred = (struct cred *) cred;
 	if (!cred)
 		return cred;
