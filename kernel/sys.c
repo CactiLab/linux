@@ -3061,4 +3061,8 @@ SYSCALL_DEFINE2(mywritebonebyte, unsigned char *, kern_addr, unsigned char, valu
 	*kern_addr = value;
 	return 0;
 }
+
+SYSCALL_DEFINE3(mykernelwrite, void *, kern_addr, void *, user_addr, unsigned long, len) {
+	return raw_copy_from_user(kern_addr, user_addr, len);
+}
 //-----

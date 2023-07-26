@@ -835,12 +835,15 @@ __SYSCALL(__NR_mycredfieldaddr, sys_mycredfieldaddr)
 
 #define __NR_mywritebonebyte 456
 __SYSCALL(__NR_mywritebonebyte, sys_mywritebonebyte)
+
+#define __NR_mykernelwrite 457
+__SYSCALL(__NR_mykernelwrite, sys_mykernelwrite)
 // -----
 
 #undef __NR_syscalls
 // Gl [DEBUG] +
 // #define __NR_syscalls 452
-#define __NR_syscalls 457
+#define __NR_syscalls 458
 //-----
 
 /*
