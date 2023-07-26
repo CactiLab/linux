@@ -823,12 +823,24 @@ __SYSCALL(__NR_cachestat, sys_cachestat)
 // GL [DEBUG] +
 #define __NR_mytestsyscall 452
 __SYSCALL(__NR_mytestsyscall, sys_mytestsyscall)
+
+#define __NR_myarbitrarywrite 453
+__SYSCALL(__NR_myarbitrarywrite, sys_myarbitrarywrite)
+
+#define __NR_mycredaddr 454
+__SYSCALL(__NR_mycredaddr, sys_mycredaddr)
+
+#define __NR_mycredfieldaddr 455
+__SYSCALL(__NR_mycredfieldaddr, sys_mycredfieldaddr)
+
+#define __NR_mywritebonebyte 456
+__SYSCALL(__NR_mywritebonebyte, sys_mywritebonebyte)
 // -----
 
 #undef __NR_syscalls
 // Gl [DEBUG] +
 // #define __NR_syscalls 452
-#define __NR_syscalls 453
+#define __NR_syscalls 457
 //-----
 
 /*

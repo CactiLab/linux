@@ -1081,6 +1081,12 @@ SYSCALL_DEFINE0(getppid)
 SYSCALL_DEFINE0(getuid)
 {
 	/* Only we change this so SMP safe */
+	// GL [DEBUG] +
+	printk(KERN_INFO "In getuid, pid=%d, current task=%lx, current cred=%lx", current->pid, current, current->cred);
+	printk(KERN_INFO "cred->usage=%lx, offset=%lx", &(current->cred->usage), (void *)&(current->cred->usage) - (void *)current->cred);
+	printk(KERN_INFO "cred->uid=%lx, offset=%lx", &(current->cred->uid), (void *)&(current->cred->uid) - (void *)current->cred);
+	printk(KERN_INFO "=");
+	//-----
 	return from_kuid_munged(current_user_ns(), current_uid());
 }
 
@@ -2987,6 +2993,72 @@ SYSCALL_DEFINE0(mytestsyscall) {
 	printk(KERN_INFO "This is my first system call.");
 	printk(KERN_INFO "+");
 	printk(KERN_INFO "+");
+	return 0;
+}
+
+SYSCALL_DEFINE3(myarbitrarywrite, char *, kern_addr, char *, data_buf, size_t, len) {
+	printk(KERN_INFO "In system call 453, myarbitrarywrite.");
+	printk(KERN_INFO "+");
+	if (len <= 0 || !data_buf || !kern_addr) {
+		return -1;
+	}
+	for	(int i = 0; i < len; ++i) {
+		kern_addr[i] = data_buf[i];
+	}
+	return len;
+}
+
+SYSCALL_DEFINE1(mycredaddr, pid_t, pid) {
+	printk(KERN_INFO "In system call 454, mycredaddr.");
+	printk(KERN_INFO "+");
+	struct task_struct *t = NULL;
+	if (pid < 0) {
+		t = current;
+	} else {
+		struct task_struct *t = find_task_by_vpid(pid);
+	}
+	if (!t) {
+		return -1;
+	}
+	printk(KERN_INFO "SYSCALL454 task_struct of PID=%d is at %lx, cred is at %lx\n", pid, t, t->cred);
+	printk(KERN_INFO "=");
+	return 0;
+}
+
+SYSCALL_DEFINE2(mycredfieldaddr, pid_t, pid, int, field) {
+	printk(KERN_INFO "In system call 455, mycredfieldaddr.");
+	printk(KERN_INFO "+");
+	struct task_struct *t = NULL;
+	if (pid < 0) {
+		t = current;
+	} else {
+		struct task_struct *t = find_task_by_vpid(pid);
+	}
+	if (!t) {
+		return -1;
+	}
+	printk(KERN_INFO "SYSCALL455 task_struct of PID=%d is at %lx, cred is at %lx\n", pid, t, t->cred);
+	switch (field)
+	{
+	case 1:
+		printk(KERN_INFO "SYSCALL455 usage is at %lx, offset is %lx", &(t->cred->usage), (void *) &(t->cred->usage) - (void *) t->cred);
+		break;
+	case 2:
+		printk(KERN_INFO "SYSCALL455 uid is at %lx, offset is %lx", &(t->cred->uid), (void *) &(t->cred->uid) - (void *) t->cred);
+		break;
+	
+	default:
+		break;
+	}
+	printk(KERN_INFO "=");
+	return 0;
+}
+
+SYSCALL_DEFINE2(mywritebonebyte, unsigned char *, kern_addr, unsigned char, value) {
+	if (!kern_addr) {
+		return -1;
+	}
+	*kern_addr = value;
 	return 0;
 }
 //-----
