@@ -1814,31 +1814,51 @@ static int bprm_execve(struct linux_binprm *bprm,
 	// GL [DEBUG] +
 	printk(KERN_INFO "+++++++++++++++bprm_execve++++++++++");
 	printk(KERN_INFO "current at %lx, PID=%d, PPID=%d CMD=%s\n", current, current->pid, current->real_parent->pid, current->comm);
+	my_print_cred_values("bprm_execve");
 	printk(KERN_INFO "============++++++++++++++==========");
 	//-----
 	struct file *file;
 	int retval;
-
+	// GL [DEBUG] +
+	printk(KERN_INFO "beacon #-7");
+	//-----
 	retval = prepare_bprm_creds(bprm);
 	if (retval)
 		return retval;
-
+	// GL [DEBUG] +
+	printk(KERN_INFO "beacon #-6");
+	//-----
 	/*
 	 * Check for unsafe execution states before exec_binprm(), which
 	 * will call back into begin_new_exec(), into bprm_creds_from_file(),
 	 * where setuid-ness is evaluated.
 	 */
 	check_unsafe_exec(bprm);
+	// GL [DEBUG] +
+	printk(KERN_INFO "beacon #-5");
+	//-----
 	current->in_execve = 1;
 	sched_mm_cid_before_execve(current);
-
+	// GL [DEBUG] +
+	printk(KERN_INFO "beacon #-5");
+	//-----
 	file = do_open_execat(fd, filename, flags);
+		// GL [DEBUG] +
+	printk(KERN_INFO "beacon #-4");
+	//-----
 	retval = PTR_ERR(file);
+		// GL [DEBUG] +
+	printk(KERN_INFO "beacon #-3");
+	//-----
 	if (IS_ERR(file))
 		goto out_unmark;
-
+	// GL [DEBUG] +
+	printk(KERN_INFO "beacon #-3");
+	//-----
 	sched_exec();
-
+	// GL [DEBUG] +
+	printk(KERN_INFO "beacon #-2");
+	//-----
 	bprm->file = file;
 	/*
 	 * Record that a name derived from an O_CLOEXEC fd will be
@@ -1851,24 +1871,45 @@ static int bprm_execve(struct linux_binprm *bprm,
 	 */
 	if (bprm->fdpath && get_close_on_exec(fd))
 		bprm->interp_flags |= BINPRM_FLAGS_PATH_INACCESSIBLE;
-
+	// GL [DEBUG] +
+	printk(KERN_INFO "beacon #-1");
+	//-----
 	/* Set the unchanging part of bprm->cred */
 	retval = security_bprm_creds_for_exec(bprm);
 	if (retval)
 		goto out;
-
+	// GL [DEBUG] +
+	printk(KERN_INFO "beacon #0");
+	//-----
 	retval = exec_binprm(bprm);
 	if (retval < 0)
 		goto out;
-
+	// GL [DEBUG] +
+	printk(KERN_INFO "beacon #1");
+	//-----
 	sched_mm_cid_after_execve(current);
+	// GL [DEBUG] +
+	printk(KERN_INFO "beacon #2");
+	//-----
 	/* execve succeeded */
 	current->fs->in_exec = 0;
 	current->in_execve = 0;
 	rseq_execve(current);
+	// GL [DEBUG] +
+	printk(KERN_INFO "beacon #3");
+	//-----
 	user_events_execve(current);
+	// GL [DEBUG] +
+	printk(KERN_INFO "beacon #4");
+	//-----
 	acct_update_integrals(current);
+	// GL [DEBUG] +
+	printk(KERN_INFO "beacon #5");
+	//-----
 	task_numa_free(current, false);
+	// GL [DEBUG] +
+	printk(KERN_INFO "beacon #6");
+	//-----
 	return retval;
 
 out:

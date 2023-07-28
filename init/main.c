@@ -992,6 +992,8 @@ void start_kernel(void)
 	// GL [DEBUG] +
 	printk(KERN_INFO "start_kernel current at %lx, PID=%d, PPID=%d CMD=%s\n", current, current->pid, current->real_parent->pid, current->comm);
 	printk(KERN_INFO "start_kernel, cred %lx", current->cred);
+	my_print_cred_values("start_kernel");
+	printk(KERN_INFO "&init_task is at %lx", &init_task);
 	//-----
 	perf_event_init();
 	profile_init();

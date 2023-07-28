@@ -617,8 +617,9 @@ long __sys_setreuid(uid_t ruid, uid_t euid)
 
 	// GL
 	printk(KERN_INFO "+");
-	printk(KERN_INFO "At the beginning of __sys_setreuid");
-	printk(KERN_INFO "Address of current_cred: %lx", current_cred());
+	printk(KERN_INFO "At the beginning of __sys_setreuid, %d", ruid);
+	// printk(KERN_INFO "Address of current_cred: %lx", current_cred());
+	my_print_cred_values("__sys_setreuid");
 	printk(KERN_INFO "-");
 	// get_cred_field_pac(NULL, 0, 0);
 	//-----

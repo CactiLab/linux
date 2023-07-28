@@ -2911,6 +2911,15 @@ pid_t kernel_clone(struct kernel_clone_args *args)
 
 	p = copy_process(NULL, trace, NUMA_NO_NODE, args);
 	// GL [DEBUG] +
+	if (likely(p)) {
+		my_print_cred_values("kernel_clone");
+		printk(KERN_INFO "Child created: task_struct is at %lx, PID=%d, CMD=%s\n", p, p->pid, p->comm);
+		printk(KERN_INFO "++++++++++Child process Cred++++++++++");
+		printk("p->cred is at %lx", p->cred);
+		printk("p->real_cred is at %lx", p->real_cred);
+		printk("p->ptracer_cred is at %lx", p->ptracer_cred);
+		my_print_cred_values_by_pointer(p->cred);
+	}
 	/*
 	my_print_keys("in `kernel_clone`, after calling `copy_process`");
 	printk(KERN_INFO "--------------------------------------------");

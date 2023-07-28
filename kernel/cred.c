@@ -267,10 +267,10 @@ struct cred *prepare_creds(void)
 	// GL
 	printk(KERN_INFO "+");
 	printk(KERN_INFO "In prepare_creds:...");
-	printk(KERN_INFO "current at %lx, PID=%d, PPID=%d CMD=%s\n", current, current->pid, current->real_parent->pid, current->comm);
-	printk(KERN_INFO "current cred at %lx", current_cred());
-	printk(KERN_INFO "cred old: %lx", old);
-	printk(KERN_INFO "cred new: %lx", new);
+	printk(KERN_INFO "[prepare_creds] current at %lx, PID=%d, PPID=%d CMD=%s\n", current, current->pid, current->real_parent->pid, current->comm);
+	printk(KERN_INFO "[prepare_creds] current cred at %lx", current_cred());
+	printk(KERN_INFO "[prepare_creds] cred old: %lx", old);
+	printk(KERN_INFO "[prepare_creds] cred new: %lx", new);
 	printk(KERN_INFO "-");
 	//-----
 	memcpy(new, old, sizeof(struct cred));
@@ -404,6 +404,12 @@ int copy_creds(struct task_struct *p, unsigned long clone_flags)
 #endif
 
 	p->cred = p->real_cred = get_cred(new);
+	// GL [DEBUG] +
+	printk(KERN_INFO "+");
+	printk(KERN_INFO "In copy_cred...");
+	printk(KERN_INFO "[copy_cred] new cred is at %lx", new);
+	printk(KERN_INFO "-");
+	//-----
 	inc_rlimit_ucounts(task_ucounts(p), UCOUNT_RLIMIT_NPROC, 1);
 	alter_cred_subscribers(new, 2);
 	validate_creds(new);
@@ -458,9 +464,9 @@ int commit_creds(struct cred *new)
 	// GL
 	printk(KERN_INFO "+");
 	printk(KERN_INFO "At the beginning of commit_creds:...");
-	printk(KERN_INFO "current at %lx, PID=%d, PPID=%d CMD=%s\n", current, current->pid, current->real_parent->pid, current->comm);
-	printk(KERN_INFO "current cred at %lx", current_cred());
-	printk(KERN_INFO "argument new (cred to be installed) is at %lx", new);
+	printk(KERN_INFO "[commit_creds0] current at %lx, PID=%d, PPID=%d CMD=%s\n", current, current->pid, current->real_parent->pid, current->comm);
+	printk(KERN_INFO "[commit_creds0] current cred at %lx", current_cred());
+	printk(KERN_INFO "[commit_creds0] argument new (cred to be installed) is at %lx", new);
 	printk(KERN_INFO "-");
 	//-----
 	struct task_struct *task = current;
@@ -539,9 +545,10 @@ int commit_creds(struct cred *new)
 	// GL
 	printk(KERN_INFO "+");
 	printk(KERN_INFO "At the end of commit_creds:...");
-	printk(KERN_INFO "current at %lx, PID=%d, PPID=%d CMD=%s\n", current, current->pid, current->real_parent->pid, current->comm);
-	printk(KERN_INFO "current cred at %lx", current_cred());
+	printk(KERN_INFO "[commit_creds1] current at %lx, PID=%d, PPID=%d CMD=%s\n", current, current->pid, current->real_parent->pid, current->comm);
+	printk(KERN_INFO "[commit_creds1] current cred at %lx", current_cred());
 	printk(KERN_INFO "-");
+	my_print_cred_values("commit_creds1");
 	//-----
 	return 0;
 }
@@ -858,7 +865,8 @@ void __init cred_init(void)
 	// GL [DEBUG] +
 	printk(KERN_INFO "cred_init current at %lx, PID=%d, PPID=%d CMD=%s\n", current, current->pid, current->real_parent->pid, current->comm);
 	printk(KERN_INFO "cred_init, cred %lx", current->cred);
-	printk(KERN_INFO "&init_cred %lx", init_cred);
+	printk(KERN_INFO "&init_cred %lx", &init_cred);
+	my_print_cred_values_by_pointer(&init_cred);
 	//-----
 	/* allocate a slab in which we can store credentials */
 	cred_jar = kmem_cache_create("cred_jar", sizeof(struct cred), 0,
@@ -883,6 +891,9 @@ void __init cred_init(void)
  */
 struct cred *prepare_kernel_cred(struct task_struct *daemon)
 {
+	// GL [DEBUG] +
+	printk(KERN_INFO "In prepare_kernel_cred");
+	//-----
 	const struct cred *old;
 	struct cred *new;
 
