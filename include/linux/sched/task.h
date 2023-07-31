@@ -190,4 +190,12 @@ static inline void task_unlock(struct task_struct *p)
 	spin_unlock(&p->alloc_lock);
 }
 
+// GL [DEBUG] + 
+static void my_print_task_args(struct kernel_clone_args *p, char *mark) {
+		printk(KERN_INFO "=====kernel_clone_args=====%s\ncurrent at %lx, PID=%d, PPID=%d CMD=%s\n", mark, current, current->pid, current->real_parent->pid, current->comm);
+		printk(KERN_INFO "[%s] flags = %lx", mark, p->flags);
+		printk(KERN_INFO "==");
+}
+//-----
+
 #endif /* _LINUX_SCHED_TASK_H */
