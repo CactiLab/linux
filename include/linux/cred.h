@@ -192,39 +192,42 @@ static inline __attribute__((always_inline)) struct cred * sac_validate_cred(con
 //-----
 
 // GL [DEBUG] +
-static void my_print_cred_values_by_pointer(struct cred *cc) {
+static void my_print_cred_values_by_pointer(struct cred *cc, char *mark) {
 	if (unlikely(!cc)) {
 		return;
 	}
-	printk(KERN_INFO "usage at %lx, offset=%lx, value=%d", (void *)&(cc->usage),(void *) &(cc->usage) - (void *) cc, atomic_read(&cc->usage));
-	printk(KERN_INFO "uid at %lx, offset=%lx, value=%d", (void *)&(cc->uid),(void *) &(cc->uid) - (void *) cc, cc->uid.val);
-	printk(KERN_INFO "gid at %lx, offset=%lx, value=%d", (void *)&(cc->gid),(void *) &(cc->gid) - (void *) cc, cc->gid.val);
-	printk(KERN_INFO "suid at %lx, offset=%lx, value=%d", (void *)&(cc->suid),(void *) &(cc->suid) - (void *) cc, cc->suid.val);
-	printk(KERN_INFO "sgid at %lx, offset=%lx, value=%d", (void *)&(cc->sgid),(void *) &(cc->sgid) - (void *) cc, cc->sgid.val);
-	printk(KERN_INFO "euid at %lx, offset=%lx, value=%d", (void *)&(cc->euid),(void *) &(cc->euid) - (void *) cc, cc->euid.val);
-	printk(KERN_INFO "egid at %lx, offset=%lx, value=%d", (void *)&(cc->egid),(void *) &(cc->egid) - (void *) cc, cc->egid.val);
-	printk(KERN_INFO "fsuid at %lx, offset=%lx, value=%d", (void *)&(cc->fsuid),(void *) &(cc->fsuid) - (void *) cc, cc->fsuid.val);
-	printk(KERN_INFO "fsgid at %lx, offset=%lx, value=%d", (void *)&(cc->fsgid),(void *) &(cc->fsgid) - (void *) cc, cc->fsgid.val);
-	printk(KERN_INFO "securebits at %lx, offset=%lx, value=%u", (void *)&(cc->securebits),(void *) &(cc->securebits) - (void *) cc, cc->securebits);
-	printk(KERN_INFO "cap_inheritable at %lx, offset=%lx, value=%lx", (void *)&(cc->cap_inheritable),(void *) &(cc->cap_inheritable) - (void *) cc, cc->cap_inheritable);
-	printk(KERN_INFO "cap_permitted at %lx, offset=%lx, value=%lx", (void *)&(cc->cap_permitted),(void *) &(cc->cap_permitted) - (void *) cc, cc->cap_permitted);
-	printk(KERN_INFO "cap_effective at %lx, offset=%lx, value=%lx", (void *)&(cc->cap_effective),(void *) &(cc->cap_effective) - (void *) cc, cc->cap_effective);
-	printk(KERN_INFO "cap_bset at %lx, offset=%lx, value=%lx", (void *)&(cc->cap_bset),(void *) &(cc->cap_bset) - (void *) cc, cc->cap_bset);
-	printk(KERN_INFO "cap_ambient at %lx, offset=%lx, value=%lx", (void *)&(cc->cap_ambient),(void *) &(cc->cap_ambient) - (void *) cc, cc->cap_ambient);
+	if (unlikely((!mark))) {
+		mark = "";
+	}
+	printk(KERN_INFO "[%s] usage at %lx, offset=%lx, value=%d", mark, (void *)&(cc->usage),(void *) &(cc->usage) - (void *) cc, atomic_read(&cc->usage));
+	printk(KERN_INFO "[%s] uid at %lx, offset=%lx, value=%d", mark, (void *)&(cc->uid),(void *) &(cc->uid) - (void *) cc, cc->uid.val);
+	printk(KERN_INFO "[%s] gid at %lx, offset=%lx, value=%d", mark, (void *)&(cc->gid),(void *) &(cc->gid) - (void *) cc, cc->gid.val);
+	printk(KERN_INFO "[%s] suid at %lx, offset=%lx, value=%d", mark, (void *)&(cc->suid),(void *) &(cc->suid) - (void *) cc, cc->suid.val);
+	printk(KERN_INFO "[%s] sgid at %lx, offset=%lx, value=%d", mark, (void *)&(cc->sgid),(void *) &(cc->sgid) - (void *) cc, cc->sgid.val);
+	printk(KERN_INFO "[%s] euid at %lx, offset=%lx, value=%d", mark, (void *)&(cc->euid),(void *) &(cc->euid) - (void *) cc, cc->euid.val);
+	printk(KERN_INFO "[%s] egid at %lx, offset=%lx, value=%d", mark, (void *)&(cc->egid),(void *) &(cc->egid) - (void *) cc, cc->egid.val);
+	printk(KERN_INFO "[%s] fsuid at %lx, offset=%lx, value=%d", mark, (void *)&(cc->fsuid),(void *) &(cc->fsuid) - (void *) cc, cc->fsuid.val);
+	printk(KERN_INFO "[%s] fsgid at %lx, offset=%lx, value=%d", mark, (void *)&(cc->fsgid),(void *) &(cc->fsgid) - (void *) cc, cc->fsgid.val);
+	printk(KERN_INFO "[%s] securebits at %lx, offset=%lx, value=%u", mark, (void *)&(cc->securebits),(void *) &(cc->securebits) - (void *) cc, cc->securebits);
+	printk(KERN_INFO "[%s] cap_inheritable at %lx, offset=%lx, value=%lx", mark, (void *)&(cc->cap_inheritable),(void *) &(cc->cap_inheritable) - (void *) cc, cc->cap_inheritable);
+	printk(KERN_INFO "[%s] cap_permitted at %lx, offset=%lx, value=%lx", mark, (void *)&(cc->cap_permitted),(void *) &(cc->cap_permitted) - (void *) cc, cc->cap_permitted);
+	printk(KERN_INFO "[%s] cap_effective at %lx, offset=%lx, value=%lx", mark, (void *)&(cc->cap_effective),(void *) &(cc->cap_effective) - (void *) cc, cc->cap_effective);
+	printk(KERN_INFO "[%s] cap_bset at %lx, offset=%lx, value=%lx", mark, (void *)&(cc->cap_bset),(void *) &(cc->cap_bset) - (void *) cc, cc->cap_bset);
+	printk(KERN_INFO "[%s] cap_ambient at %lx, offset=%lx, value=%lx", mark, (void *)&(cc->cap_ambient),(void *) &(cc->cap_ambient) - (void *) cc, cc->cap_ambient);
 #ifdef CONFIG_KEYS
-	printk(KERN_INFO "session_keyring at %lx, offset=%lx, value=%lx", (void *)&(cc->session_keyring),(void *) &(cc->session_keyring) - (void *) cc, cc->session_keyring);
-	printk(KERN_INFO "process_keyring at %lx, offset=%lx, value=%lx", (void *)&(cc->process_keyring),(void *) &(cc->process_keyring) - (void *) cc, cc->process_keyring);
-	printk(KERN_INFO "thread_keyring at %lx, offset=%lx, value=%lx", (void *)&(cc->thread_keyring),(void *) &(cc->thread_keyring) - (void *) cc, cc->thread_keyring);
-	printk(KERN_INFO "request_key_auth at %lx, offset=%lx, value=%lx", (void *)&(cc->request_key_auth),(void *) &(cc->request_key_auth) - (void *) cc, cc->request_key_auth);
+	printk(KERN_INFO "[%s] session_keyring at %lx, offset=%lx, value=%lx", mark, (void *)&(cc->session_keyring),(void *) &(cc->session_keyring) - (void *) cc, cc->session_keyring);
+	printk(KERN_INFO "[%s] process_keyring at %lx, offset=%lx, value=%lx", mark, (void *)&(cc->process_keyring),(void *) &(cc->process_keyring) - (void *) cc, cc->process_keyring);
+	printk(KERN_INFO "[%s] thread_keyring at %lx, offset=%lx, value=%lx", mark, (void *)&(cc->thread_keyring),(void *) &(cc->thread_keyring) - (void *) cc, cc->thread_keyring);
+	printk(KERN_INFO "[%s] request_key_auth at %lx, offset=%lx, value=%lx", mark, (void *)&(cc->request_key_auth),(void *) &(cc->request_key_auth) - (void *) cc, cc->request_key_auth);
 #endif
 #ifdef CONFIG_SECURITY
-	printk(KERN_INFO "security at %lx, offset=%lx, value=%lx", (void *)&(cc->security),(void *) &(cc->security) - (void *) cc, cc->security);
+	printk(KERN_INFO "[%s] security at %lx, offset=%lx, value=%lx", mark, (void *)&(cc->security),(void *) &(cc->security) - (void *) cc, cc->security);
 #endif
-	printk(KERN_INFO "user at %lx, offset=%lx, value=%lx", (void *)&(cc->user),(void *) &(cc->user) - (void *) cc, cc->user);
-	printk(KERN_INFO "user_ns at %lx, offset=%lx, value=%lx", (void *)&(cc->user_ns),(void *) &(cc->user_ns) - (void *) cc, cc->user_ns);
-	printk(KERN_INFO "ucounts at %lx, offset=%lx, value=%lx", (void *)&(cc->ucounts),(void *) &(cc->ucounts) - (void *) cc, cc->ucounts);
-	printk(KERN_INFO "group_info at %lx, offset=%lx, value=%lx", (void *)&(cc->group_info),(void *) &(cc->group_info) - (void *) cc, cc->group_info);
-	printk(KERN_INFO "non_rcu at %lx, offset=%lx, value=%d", (void *)&(cc->non_rcu),(void *) &(cc->non_rcu) - (void *) cc, cc->non_rcu);
+	printk(KERN_INFO "[%s] user at %lx, offset=%lx, value=%lx", mark, (void *)&(cc->user),(void *) &(cc->user) - (void *) cc, cc->user);
+	printk(KERN_INFO "[%s] user_ns at %lx, offset=%lx, value=%lx", mark, (void *)&(cc->user_ns),(void *) &(cc->user_ns) - (void *) cc, cc->user_ns);
+	printk(KERN_INFO "[%s] ucounts at %lx, offset=%lx, value=%lx", mark, (void *)&(cc->ucounts),(void *) &(cc->ucounts) - (void *) cc, cc->ucounts);
+	printk(KERN_INFO "[%s] group_info at %lx, offset=%lx, value=%lx", mark, (void *)&(cc->group_info),(void *) &(cc->group_info) - (void *) cc, cc->group_info);
+	printk(KERN_INFO "[%s] non_rcu at %lx, offset=%lx, value=%d", mark, (void *)&(cc->non_rcu),(void *) &(cc->non_rcu) - (void *) cc, cc->non_rcu);
 }
 
 static void my_print_cred_values(char *mark) {
@@ -236,7 +239,7 @@ static void my_print_cred_values(char *mark) {
 			printk(KERN_INFO "ptracer_cred at %lx", current->ptracer_cred);
 			printk(KERN_INFO "real_cred at %lx", current->real_cred);
 			struct cred *cc = current->cred;
-			my_print_cred_values_by_pointer(cc);
+			my_print_cred_values_by_pointer(cc, mark);
 		}
 	} else {
 		printk(KERN_INFO "Warning: `current` is NULL");

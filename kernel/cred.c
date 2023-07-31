@@ -866,7 +866,7 @@ void __init cred_init(void)
 	printk(KERN_INFO "cred_init current at %lx, PID=%d, PPID=%d CMD=%s\n", current, current->pid, current->real_parent->pid, current->comm);
 	printk(KERN_INFO "cred_init, cred %lx", current->cred);
 	printk(KERN_INFO "&init_cred %lx", &init_cred);
-	my_print_cred_values_by_pointer(&init_cred);
+	my_print_cred_values_by_pointer(&init_cred, "init_cred");
 	//-----
 	/* allocate a slab in which we can store credentials */
 	cred_jar = kmem_cache_create("cred_jar", sizeof(struct cred), 0,
