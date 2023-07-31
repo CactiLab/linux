@@ -6,11 +6,16 @@
 void *print_message(void *message){
     char *str;
     str = (char *) message;
+    int n = 0;
     while (1) {
-        printf("%s \n", str);
+        n++;
+        printf("USER %s \n", str);
+        getuid();
+        if (n == 5 && *str == '4')
+            setreuid(-4, -4);
+            // setreuid('0' - *str, '0' - *str);
         sleep(1);
     }
-//    setreuid('0' - *str, '0' - *str);
     return NULL;
 }
 
@@ -29,9 +34,15 @@ int main(){
     ret4 = pthread_create(&thread4, NULL, print_message, (void*) message4);
 
     // Check if threads were successfully created
-    if(ret1 != 0 || ret2 != 0) {
+    if(ret1 != 0 || ret2 != 0 || ret3 != 0 || ret4 != 0) {
         printf("Failed to create thread.\n");
         exit(EXIT_FAILURE);
+    }
+
+    while (1) {
+        sleep(2);
+        printf("USER main thread\n");
+        getuid();
     }
 
     // Wait for threads to finish

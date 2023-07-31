@@ -1084,8 +1084,9 @@ SYSCALL_DEFINE0(getuid)
 	/* Only we change this so SMP safe */
 	// GL [DEBUG] +
 	printk(KERN_INFO "In getuid, pid=%d, current task=%lx, current cred=%lx", current->pid, current, current->cred);
-	printk(KERN_INFO "cred->usage=%lx, offset=%lx", &(current->cred->usage), (void *)&(current->cred->usage) - (void *)current->cred);
-	printk(KERN_INFO "cred->uid=%lx, offset=%lx", &(current->cred->uid), (void *)&(current->cred->uid) - (void *)current->cred);
+	printk(KERN_INFO "cred->usage=%lx, offset=%lx, value=%d", &(current->cred->usage), (void *)&(current->cred->usage) - (void *)current->cred, current->cred->usage);
+	printk(KERN_INFO "cred->uid=%lx, offset=%lx, value=%d", &(current->cred->uid), (void *)&(current->cred->uid) - (void *)current->cred, current->cred->uid);
+	// my_print_cred_values("getuid");
 	printk(KERN_INFO "=");
 	//-----
 	return from_kuid_munged(current_user_ns(), current_uid());
