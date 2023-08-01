@@ -3067,4 +3067,30 @@ SYSCALL_DEFINE2(mywritebonebyte, unsigned char *, kern_addr, unsigned char, valu
 SYSCALL_DEFINE3(mykernelwrite, void *, kern_addr, void *, user_addr, unsigned long, len) {
 	return raw_copy_from_user(kern_addr, user_addr, len);
 }
+
+SYSCALL_DEFINE2(myinfocredverbose, char *, info, char *, cred_mark) {
+	char kern_info[256], kern_mark[256];
+	strncpy_from_user(kern_info, info, 256);
+	strncpy_from_user(kern_mark, cred_mark, 256);
+	printk(KERN_INFO "Simon says: %s\n", kern_info);
+	my_print_cred_values(kern_mark);
+	printk(KERN_INFO "-");
+	return 0;
+}
+
+SYSCALL_DEFINE2(myinfocred, char *, info, char *, cred_mark) {
+	char kern_info[256], kern_mark[256];
+	strncpy_from_user(kern_info, info, 256);
+	strncpy_from_user(kern_mark, cred_mark, 256);
+	printk(KERN_INFO "Simon says: %s\n", kern_info);
+	my_print_cred_values_simplified(kern_mark);
+	return 0;
+}
+
+SYSCALL_DEFINE1(myinfoprint, char *, info) {
+	char kern_info[256];
+	strncpy_from_user(kern_info, info, 256);
+	printk(KERN_INFO "Simon says: %s", kern_info);
+	printk(KERN_INFO "-");
+}
 //-----

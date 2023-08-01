@@ -838,12 +838,22 @@ __SYSCALL(__NR_mywritebonebyte, sys_mywritebonebyte)
 
 #define __NR_mykernelwrite 457
 __SYSCALL(__NR_mykernelwrite, sys_mykernelwrite)
+
+#define __NR_myinfocredverbose 458
+__SYSCALL(__NR_myinfocredverbose, sys_myinfocredverbose)
+
+#define __NR_myinfocred 459
+__SYSCALL(__NR_myinfocred, sys_myinfocred)
+
+#define __NR_myinfoprint 460
+__SYSCALL(__NR_myinfoprint, sys_myinfoprint)
+
 // -----
 
 #undef __NR_syscalls
 // Gl [DEBUG] +
 // #define __NR_syscalls 452
-#define __NR_syscalls 458
+#define __NR_syscalls 461
 //-----
 
 /*
