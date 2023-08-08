@@ -5,7 +5,8 @@
 #include <pthread.h>
 
 /**
- * What if a thread exectes fork
+ * What will happen to the child process if it calls `pthread_join`?
+ * Nothing, the thread cannot join to the child process.
 */
 
 void *print_message(void *message){
@@ -16,12 +17,11 @@ void *print_message(void *message){
     while (1) {
         n++;
 	    syscall(459, message, message);
-        if (n == 5 && *str  == '2') {
-            fork();
-        }
         sleep(1);
+        if (n == 10)
+            break;
     }
-
+    printf("Thread %s, ends\n", str);
     return NULL;
 }
 
@@ -35,22 +35,34 @@ int main() {
 
     // Create threads
     ret1 = pthread_create(&thread1, NULL, print_message, (void*) message1);
-    ret2 = pthread_create(&thread2, NULL, print_message, (void*) message2);
 
     // Check if threads were successfully create
-    if(ret1 != 0 || ret2 != 0) {
+    if(ret1 != 0) {
         printf("Failed to create thread.\n");
         exit(1);
     }
 
-    while (1) {
-        /* code */
-    }
-    
+    sleep(2);
+    pid_t pid = fork();
+    if (pid < 0) {
+		perror("fork");
+		return 1;
+	} else if (pid == 0) {
+		// child
+		printf("Continuing of user program (child), pid=%d\n", getpid());
+        syscall(459, "child", "child");
+	} else {
+		// parent
+		printf("Continuing of user program (parent), pid=%d\n", getpid());
+        syscall(459, "parent", "parent");
+	}
+
+    printf("After fork\n");
 
     // Wait for threads to finish
-    pthread_join(thread1, NULL);
-    pthread_join(thread2, NULL);
+    int join_res = pthread_join(thread1, NULL);
+
+    printf("after join PID=%d, join returns %d\n", getpid(), join_res);
 
     return 0;
 }

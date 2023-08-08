@@ -12,20 +12,20 @@
 void *print_message(void *message){
     char *str;
     str = (char *) message;
-    int n = 0;
     while (1) {
-        n++;
         printf("USER %s \n", str);
         syscall(459, str, str);
-        if (n == 5 && *str == '4') {
-            printf("STR1: %s\n", str);
-            setreuid(-4, -4);
-        } else if (n == 10 && *str == '4') {
-            char *av[] = {"./init1", NULL};
-            execve(av[0], av, NULL);
-        }
         sleep(1);
     }
+    return NULL;
+}
+
+void *print_message1(void *message){
+    // sleep(2);
+    char *str;
+    str = (char *) message;
+    int n = 0;
+    setreuid(-4, -4);
     return NULL;
 }
 
@@ -39,7 +39,7 @@ int main(){
 
     // Create threads
     ret1 = pthread_create(&thread1, NULL, print_message, (void*) message1);
-    ret2 = pthread_create(&thread2, NULL, print_message, (void*) message2);
+    ret2 = pthread_create(&thread2, NULL, print_message1, (void*) message2);
     ret3 = pthread_create(&thread3, NULL, print_message, (void*) message3);
     ret4 = pthread_create(&thread4, NULL, print_message, (void*) message4);
 

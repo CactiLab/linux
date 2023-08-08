@@ -4,6 +4,10 @@
 #include <sys/syscall.h>
 #include <pthread.h>
 
+/**
+ * Test will thread and forked child process share cred, and will the forked child process have multiple thread. (no)
+*/
+
 void *print_message(void *message){
     char *str;
     str = (char *) message;

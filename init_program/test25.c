@@ -4,6 +4,10 @@
 #include <sys/syscall.h>
 #include <pthread.h>
 
+/**
+ * What if a thread exectes fork
+*/
+
 void *print_message(void *message){
     char *str;
     str = (char *) message;
