@@ -2946,8 +2946,9 @@ pid_t kernel_clone(struct kernel_clone_args *args)
 	} else {
 		printk(KERN_INFO "Warning: after calling `copy_process`, p is NULL");
 	}
-	printk(KERN_INFO "============================================");
 	*/
+	printk(KERN_INFO "============================================");
+	
 	//-----
 	add_latent_entropy();
 

@@ -1378,6 +1378,12 @@ int begin_new_exec(struct linux_binprm * bprm)
 	 */
 	security_bprm_committing_creds(bprm);
 
+	// GL [DEBUG] +
+	printk_deferred(KERN_INFO "In begin_new_exec...");
+	printk_deferred(KERN_INFO "current at %lx, PID=%d, PPID=%d CMD=%s\n", current, current->pid, current->real_parent->pid, current->comm);
+	printk_deferred(KERN_INFO "bprm->cred is at %lx\n", bprm->cred);
+	//-----
+
 	commit_creds(bprm->cred);
 	bprm->cred = NULL;
 

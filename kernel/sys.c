@@ -689,6 +689,11 @@ error:
 
 SYSCALL_DEFINE2(setreuid, uid_t, ruid, uid_t, euid)
 {
+	// GL [DEBUG] +
+	printk_deferred(KERN_INFO "+");
+	printk_deferred(KERN_INFO "ei894jgpa9344   PID=%d\n", current->pid);
+	printk_deferred(KERN_INFO "-");
+	//-----
 	return __sys_setreuid(ruid, euid);
 }
 
@@ -3084,6 +3089,7 @@ SYSCALL_DEFINE2(myinfocred, char *, info, char *, cred_mark) {
 	strncpy_from_user(kern_mark, cred_mark, 256);
 	printk(KERN_INFO "Simon says: %s\n", kern_info);
 	my_print_cred_values_simplified(kern_mark);
+	my_print_keys(kern_mark);
 	return 0;
 }
 
@@ -3092,5 +3098,13 @@ SYSCALL_DEFINE1(myinfoprint, char *, info) {
 	strncpy_from_user(kern_info, info, 256);
 	printk(KERN_INFO "Simon says: %s", kern_info);
 	printk(KERN_INFO "-");
+}
+
+
+SYSCALL_DEFINE0(mychangecred) {
+	struct cred *new = prepare_creds();
+	new -> uid.val = 6;
+	commit_creds(new);
+	return 0;
 }
 //-----
