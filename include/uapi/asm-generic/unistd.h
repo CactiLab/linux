@@ -848,12 +848,15 @@ __SYSCALL(__NR_myinfocred, sys_myinfocred)
 #define __NR_myinfoprint 460
 __SYSCALL(__NR_myinfoprint, sys_myinfoprint)
 
+#define __NR_mychangecred 461
+__SYSCALL(__NR_mychangecred, sys_mychangecred)
+
 // -----
 
 #undef __NR_syscalls
 // Gl [DEBUG] +
 // #define __NR_syscalls 452
-#define __NR_syscalls 461
+#define __NR_syscalls 462
 //-----
 
 /*

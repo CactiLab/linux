@@ -35,6 +35,12 @@ static long do_ni_syscall(struct pt_regs *regs, int scno)
 
 static long __invoke_syscall(struct pt_regs *regs, syscall_fn_t syscall_fn)
 {
+	// GL [DEBUG] +
+	printk_deferred(KERN_INFO "+");
+	printk_deferred(KERN_INFO "__invoke_syscall, syscall_fn=%lx", syscall_fn);
+	printk_deferred(KERN_INFO "current at %lx, PID=%d, PPID=%d CMD=%s\n", current, current->pid, current->real_parent->pid, current->comm);
+	printk_deferred(KERN_INFO "-");
+	//-----
 	return syscall_fn(regs);
 }
 
@@ -49,6 +55,11 @@ static void invoke_syscall(struct pt_regs *regs, unsigned int scno,
 	if (scno < sc_nr) {
 		syscall_fn_t syscall_fn;
 		syscall_fn = syscall_table[array_index_nospec(scno, sc_nr)];
+		// GL [DEBUG] +
+		printk_deferred(KERN_INFO "+");
+		printk_deferred(KERN_INFO "invoke_syscall, scno=%d, sc_nr=%d, syscall_fn=%lx", scno, sc_nr, syscall_fn);
+		printk_deferred(KERN_INFO "-");
+		//-----
 		ret = __invoke_syscall(regs, syscall_fn);
 	} else {
 		ret = do_ni_syscall(regs, scno);
@@ -81,6 +92,13 @@ void syscall_trace_exit(struct pt_regs *regs);
 static void el0_svc_common(struct pt_regs *regs, int scno, int sc_nr,
 			   const syscall_fn_t syscall_table[])
 {
+	// GL [DEBUG] +
+	printk_deferred(KERN_INFO "+");
+	printk_deferred(KERN_INFO "el0_svc_common");
+	printk_deferred(KERN_INFO "current at %lx, PID=%d, PPID=%d CMD=%s\n", current, current->pid, current->real_parent->pid, current->comm);
+	printk_deferred(KERN_INFO "-");
+	//-----
+
 	unsigned long flags = read_thread_flags();
 
 	regs->orig_x0 = regs->regs[0];

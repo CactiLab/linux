@@ -642,6 +642,11 @@ static void noinstr el0_dbg(struct pt_regs *regs, unsigned long esr)
 
 static void noinstr el0_svc(struct pt_regs *regs)
 {
+	// GL [DEBUG] +
+	printk_deferred(KERN_INFO "+");
+	printk_deferred(KERN_INFO "el0_sve PID=%d", current->pid);
+	printk_deferred(KERN_INFO "-");
+	//-----
 	enter_from_user_mode(regs);
 	cortex_a76_erratum_1463225_svc_handler();
 	do_el0_svc(regs);
@@ -658,6 +663,11 @@ static void noinstr el0_fpac(struct pt_regs *regs, unsigned long esr)
 
 asmlinkage void noinstr el0t_64_sync_handler(struct pt_regs *regs)
 {
+	// GL [DEBUG] +
+	printk_deferred(KERN_INFO "+");
+	printk_deferred(KERN_INFO "el0t_64_sync_handler PID=%d", current->pid);
+	printk_deferred(KERN_INFO "-");
+	//-----
 	unsigned long esr = read_sysreg(esr_el1);
 
 	switch (ESR_ELx_EC(esr)) {
