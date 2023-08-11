@@ -5,7 +5,8 @@
 #include <pthread.h>
 
 /**
- * What if a thread exectes fork
+ * What if a thread executes fork
+ * a new process will be created, the PPID of the child process is the PID of the paraent process (not thread)
 */
 
 void *print_message(void *message){

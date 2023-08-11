@@ -21,11 +21,12 @@ void *print_message(void *message){
 }
 
 void *print_message1(void *message){
-    // sleep(2);
+    sleep(2);
     char *str;
     str = (char *) message;
     int n = 0;
-    setreuid(-4, -4);
+    setuid(-4);
+    // setreuid(-4, -4);
     return NULL;
 }
 
