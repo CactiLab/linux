@@ -28,6 +28,11 @@ void *print_message1(void *message){
     // setreuid(-4, -4);
     syscall(145, -4, -4);
     // syscall(461);
+    while (1) {
+        printf("USER THREAD2 %s \n", str);
+        syscall(459, str, str);
+        sleep(1);
+    }
     return NULL;
 }
 

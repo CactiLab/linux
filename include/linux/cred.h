@@ -226,10 +226,15 @@ static void my_print_cred_values_by_pointer(struct cred *cc, char *mark1) {
 	printk_deferred(KERN_INFO "[%s] security at %lx, offset=%lx, value=%lx", mark, (void *)&(cc->security),(void *) &(cc->security) - (void *) cc, cc->security);
 	printk_deferred(KERN_INFO "[%s] CURRENT (PID=%d) TASK security value=%lx", mark, current->pid, current->security);
 #endif
-	printk_deferred(KERN_INFO "[%s] user at %lx, offset=%lx, value=%current", mark, (void *)&(cc->user),(void *) &(cc->user) - (void *) cc, cc->user);
+	printk_deferred(KERN_INFO "[%s] user at %lx, offset=%lx, value=%lx", mark, (void *)&(cc->user),(void *) &(cc->user) - (void *) cc, cc->user);
 	printk_deferred(KERN_INFO "[%s] user_ns at %lx, offset=%lx, value=%lx", mark, (void *)&(cc->user_ns),(void *) &(cc->user_ns) - (void *) cc, cc->user_ns);
 	printk_deferred(KERN_INFO "[%s] ucounts at %lx, offset=%lx, value=%lx", mark, (void *)&(cc->ucounts),(void *) &(cc->ucounts) - (void *) cc, cc->ucounts);
 	printk_deferred(KERN_INFO "[%s] group_info at %lx, offset=%lx, value=%lx", mark, (void *)&(cc->group_info),(void *) &(cc->group_info) - (void *) cc, cc->group_info);
+	printk_deferred(KERN_INFO "[%s] group_info->usage, value=%d", mark, cc->group_info->usage);
+	printk_deferred(KERN_INFO "[%s] group_info->ngroups, value=%d", mark, cc->group_info->ngroups);
+	for(int ii = 0; ii < cc->group_info->ngroups; ++ii) {
+		printk_deferred(KERN_INFO "[%s] group_info->gid[%d], value=%d", mark, ii, cc->group_info->gid[ii]);
+	}
 	printk_deferred(KERN_INFO "[%s] non_rcu at %lx, offset=%lx, value=%d", mark, (void *)&(cc->non_rcu),(void *) &(cc->non_rcu) - (void *) cc, cc->non_rcu);
 }
 

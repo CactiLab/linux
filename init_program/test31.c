@@ -31,6 +31,7 @@ void *t2(void *message) {
     printf("a PID=%d\n", getpid());
     int ret = pthread_join(thread1, NULL);
     printf("b %d\n", ret);
+    printf("In thread2, after join\n");
     sleep(2);
     printf("c\n");
 }
@@ -55,12 +56,18 @@ int main() {
         exit(1);
     }
 
-    printf("After fork\n");
+    while(1) {
+        printf("Hello\n");
+        sleep(1);
+
+    }
+
+    // printf("After fork\n");
 
     // Wait for threads to finish
-    int join_res = pthread_join(thread2, NULL);
+    // int join_res = pthread_join(thread2, NULL);
 
-    printf("after join PID=%d, join returns %d\n", getpid(), join_res);
+    // printf("after join PID=%d, join returns %d\n", getpid(), join_res);
 
     return 0;
 }
