@@ -721,7 +721,7 @@ int set_cred_ucounts(struct cred *new)
 }
 
 // GL [code] +
-#ifdef CONFIG_ARM64_PAUTH_CRED_SAC
+#ifdef CONFIG_ARM64_PTR_AUTH_CRED_PROTECT
 /**
  * get_cred_field_pac - Calculate pointer authentication code using ARMv8.3a PACGA instruction
  * 
@@ -862,15 +862,20 @@ inline __attribute__((always_inline)) struct cred * sac_validate_cred(const stru
  */
 void __init cred_init(void)
 {
+	/* allocate a slab in which we can store credentials */
+	cred_jar = kmem_cache_create("cred_jar", sizeof(struct cred), 0,
+			SLAB_HWCACHE_ALIGN|SLAB_PANIC|SLAB_ACCOUNT, NULL);
+	// GL [code] +
+#ifdef CONFIG_ARM64_PTR_AUTH_CRED_PROTECT
+	sac_sign_cred(&init_cred);
+#endif
+	//-----
 	// GL [DEBUG] +
 	printk(KERN_INFO "cred_init current at %lx, PID=%d, PPID=%d CMD=%s\n", current, current->pid, current->real_parent->pid, current->comm);
 	printk(KERN_INFO "cred_init, cred %lx", current->cred);
 	printk(KERN_INFO "&init_cred %lx", &init_cred);
 	my_print_cred_values_by_pointer(&init_cred, "init_cred");
 	//-----
-	/* allocate a slab in which we can store credentials */
-	cred_jar = kmem_cache_create("cred_jar", sizeof(struct cred), 0,
-			SLAB_HWCACHE_ALIGN|SLAB_PANIC|SLAB_ACCOUNT, NULL);
 }
 
 /**

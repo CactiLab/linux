@@ -872,6 +872,7 @@ void start_kernel(void)
 	// GL [DEBUG] +
 	printk(KERN_INFO "start_kernel 1 current at %lx, PID=%d, PPID=%d CMD=%s\n", current, current->pid, current->real_parent->pid, current->comm);
 	printk(KERN_INFO "start_kernel 1, cred %lx", current->cred);
+	printk(KERN_INFO "-");
 	//-----
 	char *command_line;
 	char *after_dashes;

@@ -151,8 +151,8 @@ struct cred {
 		struct rcu_head	rcu;		/* RCU deletion hook */
 	};
 	// GL [code] +
-#ifdef CONFIG_ARM64_PAUTH_CRED_SAC
-	u_int32_t sac;				/* store the structure authentication code (SAC) of this cred structure */
+#ifdef CONFIG_ARM64_PTR_AUTH_CRED_PROTECT
+	u_int32_t sac;				/* store the structure authentication code (SAC) of this cred structure, including tradition creds, capabilities, pointers to other structures. Not reference counters */
 #endif
 	//-----
 } __randomize_layout;
@@ -177,7 +177,7 @@ extern int cred_fscmp(const struct cred *, const struct cred *);
 extern void __init cred_init(void);
 extern int set_cred_ucounts(struct cred *);
 // GL [code] +
-#ifdef CONFIG_ARM64_PAUTH_CRED_SAC
+#ifdef CONFIG_ARM64_PTR_AUTH_CRED_PROTECT
 static inline __attribute__((always_inline)) void sac_sign_cred(struct cred *);
 static inline __attribute__((always_inline)) struct cred * sac_validate_cred(const struct cred *);
 #else
@@ -236,6 +236,9 @@ static void my_print_cred_values_by_pointer(struct cred *cc, char *mark1) {
 		printk_deferred(KERN_INFO "[%s] group_info->gid[%d], value=%d", mark, ii, cc->group_info->gid[ii]);
 	}
 	printk_deferred(KERN_INFO "[%s] non_rcu at %lx, offset=%lx, value=%d", mark, (void *)&(cc->non_rcu),(void *) &(cc->non_rcu) - (void *) cc, cc->non_rcu);
+#ifdef CONFIG_ARM64_PTR_AUTH_CRED_PROTECT
+	printk_deferred(KERN_INFO "[%s] sac at %lx, offset=%lx, value=%lx", mark, (void *)&(cc->sac),(void *) &(cc->sac) - (void *) cc, cc->sac);
+#endif
 }
 
 static void my_print_cred_values_by_pointer1(struct cred *cc, char *mark1) {
@@ -276,13 +279,13 @@ static void my_print_cred_values_by_pointer1(struct cred *cc, char *mark1) {
 }
 
 static void my_print_cred_values(char *mark) {
-	printk(KERN_INFO "=====Cred=====%s", mark);
+	printk_deferred(KERN_INFO "=====Cred=====%s", mark);
 	if (likely(current)) {
-		printk(KERN_INFO "current at %lx, PID=%d, PPID=%d CMD=%s\n", current, current->pid, current->real_parent->pid, current->comm);
+		printk_deferred(KERN_INFO "current at %lx, PID=%d, PPID=%d CMD=%s\n", current, current->pid, current->real_parent->pid, current->comm);
 		if (likely(current->cred)) {
-			printk(KERN_INFO "cred at %lx", current->cred);
-			printk(KERN_INFO "ptracer_cred at %lx", current->ptracer_cred);
-			printk(KERN_INFO "real_cred at %lx", current->real_cred);
+			printk_deferred(KERN_INFO "cred at %lx", current->cred);
+			printk_deferred(KERN_INFO "ptracer_cred at %lx", current->ptracer_cred);
+			printk_deferred(KERN_INFO "real_cred at %lx", current->real_cred);
 			struct cred *cc = current->cred;
 			my_print_cred_values_by_pointer(cc, mark);
 		}
