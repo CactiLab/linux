@@ -512,53 +512,53 @@ static void flag_nproc_exceeded(struct cred *new)
 }
 
 // GL [DEBUG] + shouldn't be there, jsut for test now
-static inline __attribute__((always_inline)) u_int64_t get_cred_field_pac(const void *field_pointer, size_t field_size, u_int64_t xm) {
-	if (field_size <= 0) {
-		return 0;
-	}
+// static inline __attribute__((always_inline)) u_int64_t get_cred_field_pac(const void *field_pointer, size_t field_size, u_int64_t xm) {
+// 	if (field_size <= 0) {
+// 		return 0;
+// 	}
 
-	/* For copying data byte by byte */
-	char *field = (char *) field_pointer;
-	/* Loop control variable */
-	size_t total_chunk_size = 0;
-	/* Final result */
-	u_int64_t xd;
-	/* Input data for PACGA */
-	u_int64_t xn;
-	/* Temporary variable */
-	u_int64_t t;
+// 	/* For copying data byte by byte */
+// 	char *field = (char *) field_pointer;
+// 	/* Loop control variable */
+// 	size_t total_chunk_size = 0;
+// 	/* Final result */
+// 	u_int64_t xd;
+// 	/* Input data for PACGA */
+// 	u_int64_t xn;
+// 	/* Temporary variable */
+// 	u_int64_t t;
 
-	/* The number of loop is ceil(field_size / 8) */
-	while (total_chunk_size < field_size) {
-		size_t current_chunk_size = (field_size - total_chunk_size >= 8) ? 8 : field_size - total_chunk_size;
-		xn = 0L;
+// 	/* The number of loop is ceil(field_size / 8) */
+// 	while (total_chunk_size < field_size) {
+// 		size_t current_chunk_size = (field_size - total_chunk_size >= 8) ? 8 : field_size - total_chunk_size;
+// 		xn = 0L;
 
-		/* copy data to the variable xn */
-		int i = 0;
-		for (; i < current_chunk_size; ++i) {
-			t = (u_int64_t) (*(field + i));
-			xn |= t << (8 * i);
-		}
+// 		/* copy data to the variable xn */
+// 		int i = 0;
+// 		for (; i < current_chunk_size; ++i) {
+// 			t = (u_int64_t) (*(field + i));
+// 			xn |= t << (8 * i);
+// 		}
 
-		/* PACGA instruction is for ARMv8.3a
-		 * variable xn and xm will be the input operators for PACGA
-		 * variable xd takes the result
-		 */
-		asm volatile(
-			"PACGA %[out], %[val], %[context]\n\t"
-			: [out] "=r" (xd)
-			: [val] "r" (xn), [context] "r" (xm)
-			:
-		);
-		// printk(KERN_INFO "---------------------\n");
-		// printk(KERN_INFO "xn = %lx, xm = %lx, xd = %lx\n", xn, xm, xd);
-		// printk(KERN_INFO "---------------------\n");
-		total_chunk_size += 8;
-		field += 8;
-		xm = xd;
-	}
-	return xd;
-}
+// 		/* PACGA instruction is for ARMv8.3a
+// 		 * variable xn and xm will be the input operators for PACGA
+// 		 * variable xd takes the result
+// 		 */
+// 		asm volatile(
+// 			"PACGA %[out], %[val], %[context]\n\t"
+// 			: [out] "=r" (xd)
+// 			: [val] "r" (xn), [context] "r" (xm)
+// 			:
+// 		);
+// 		// printk(KERN_INFO "---------------------\n");
+// 		// printk(KERN_INFO "xn = %lx, xm = %lx, xd = %lx\n", xn, xm, xd);
+// 		// printk(KERN_INFO "---------------------\n");
+// 		total_chunk_size += 8;
+// 		field += 8;
+// 		xm = xd;
+// 	}
+// 	return xd;
+// }
 //-----
 
 /*

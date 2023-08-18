@@ -1925,6 +1925,20 @@ config ARM64_PTR_AUTH_KERNEL_PAGA
 	  When enabled, PAGA key will be added to pointer authentication for kerenl, 
 	  like PAIA key.
 
+config ARM64_PTR_AUTH_KERNEL_PAGA_CONSTANT
+	bool "Use a constant random value for PAGA key (Not available)"
+	default n
+	depends on ARM64_PTR_AUTH_KERNEL_PAGA
+	help
+	  When enabled, only one random value will be generated for PAGA kernel key
+
+config ARM64_PTR_AUTH_KERNEL_PAGA_FIXED
+	bool "Use a fixed value for PAGA key"
+	default n
+	depends on ARM64_PTR_AUTH_KERNEL_PAGA
+	help
+	  When enabled, only one fixed value will be used for PAGA kernel key
+
 config ARM64_PTR_AUTH_CRED_PROTECT
 	bool "Use PA to protect cred structure"
 	default n

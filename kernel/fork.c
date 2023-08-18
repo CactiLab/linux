@@ -2362,6 +2362,11 @@ __latent_entropy struct task_struct *copy_process(
 	DEBUG_LOCKS_WARN_ON(!p->softirqs_enabled);
 #endif
 	retval = copy_creds(p, clone_flags);
+	// GL [code] +
+#ifdef CONFIG_ARM64_PTR_AUTH_CRED_PROTECT
+	sac_sign_cred(p->cred, "copy_process");
+#endif
+	//-----
 	if (retval < 0)
 		goto bad_fork_free;
 
@@ -2909,8 +2914,13 @@ pid_t kernel_clone(struct kernel_clone_args *args)
 			trace = 0;
 	}
 
+	// GL [DEBUG] +
+	printk_deferred(KERN_INFO "In kernl_clone, before calling copy_process, pid=%d", current->pid);
+	//-----
+
 	p = copy_process(NULL, trace, NUMA_NO_NODE, args);
 	// GL [DEBUG] +
+	printk_deferred(KERN_INFO "In kernl_clone, after calling copy_process, pid=%d", current->pid);
 	if (likely(p)) {
 		printk("in kernel_clone");
 		my_print_task_args(args, "kernel_clone");
@@ -2946,9 +2956,10 @@ pid_t kernel_clone(struct kernel_clone_args *args)
 	} else {
 		printk(KERN_INFO "Warning: after calling `copy_process`, p is NULL");
 	}
-	*/
-	printk(KERN_INFO "============================================");
 	
+	printk(KERN_INFO "============================================");
+	*/
+
 	//-----
 	add_latent_entropy();
 

@@ -65,7 +65,12 @@ static __always_inline void ptrauth_keys_init_kernel(struct ptrauth_keys_kernel 
 		get_random_bytes(&keys->apia, sizeof(keys->apia));
 	// GL [PAGA_1] +
 #ifdef CONFIG_ARM64_PTR_AUTH_KERNEL_PAGA
+#ifdef CONFIG_ARM64_PTR_AUTH_KERNEL_PAGA_FIXED
+	keys->apga.lo = 0x12345678;
+	keys->apga.hi = 0x87654321;
+#else
 	get_random_bytes(&keys->apga, sizeof(keys->apga));
+#endif
 #endif
 	//-----
 }

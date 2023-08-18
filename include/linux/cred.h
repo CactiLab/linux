@@ -176,20 +176,6 @@ extern int set_create_files_as(struct cred *, struct inode *);
 extern int cred_fscmp(const struct cred *, const struct cred *);
 extern void __init cred_init(void);
 extern int set_cred_ucounts(struct cred *);
-// GL [code] +
-#ifdef CONFIG_ARM64_PTR_AUTH_CRED_PROTECT
-static inline __attribute__((always_inline)) void sac_sign_cred(struct cred *);
-static inline __attribute__((always_inline)) struct cred * sac_validate_cred(const struct cred *);
-#else
-static inline __attribute__((always_inline)) void sac_sign_cred(struct cred *) {
-
-}
-
-static inline __attribute__((always_inline)) struct cred * sac_validate_cred(const struct cred *) {
-
-}
-#endif
-//-----
 
 // GL [DEBUG] +
 static void my_print_cred_values_by_pointer(struct cred *cc, char *mark1) {
@@ -202,40 +188,40 @@ static void my_print_cred_values_by_pointer(struct cred *cc, char *mark1) {
 	char mark[256];
 	sprintf(mark, "%s, PID=%d", mark1, current->pid);
 	printk_deferred(KERN_INFO "[%s] usage at %lx, offset=%lx, value=%d", mark, (void *)&(cc->usage),(void *) &(cc->usage) - (void *) cc, atomic_read(&cc->usage));
-	printk_deferred(KERN_INFO "[%s] uid at %lx, offset=%lx, value=%d", mark, (void *)&(cc->uid),(void *) &(cc->uid) - (void *) cc, cc->uid.val);
-	printk_deferred(KERN_INFO "[%s] gid at %lx, offset=%lx, value=%d", mark, (void *)&(cc->gid),(void *) &(cc->gid) - (void *) cc, cc->gid.val);
-	printk_deferred(KERN_INFO "[%s] suid at %lx, offset=%lx, value=%d", mark, (void *)&(cc->suid),(void *) &(cc->suid) - (void *) cc, cc->suid.val);
-	printk_deferred(KERN_INFO "[%s] sgid at %lx, offset=%lx, value=%d", mark, (void *)&(cc->sgid),(void *) &(cc->sgid) - (void *) cc, cc->sgid.val);
-	printk_deferred(KERN_INFO "[%s] euid at %lx, offset=%lx, value=%d", mark, (void *)&(cc->euid),(void *) &(cc->euid) - (void *) cc, cc->euid.val);
-	printk_deferred(KERN_INFO "[%s] egid at %lx, offset=%lx, value=%d", mark, (void *)&(cc->egid),(void *) &(cc->egid) - (void *) cc, cc->egid.val);
-	printk_deferred(KERN_INFO "[%s] fsuid at %lx, offset=%lx, value=%d", mark, (void *)&(cc->fsuid),(void *) &(cc->fsuid) - (void *) cc, cc->fsuid.val);
-	printk_deferred(KERN_INFO "[%s] fsgid at %lx, offset=%lx, value=%d", mark, (void *)&(cc->fsgid),(void *) &(cc->fsgid) - (void *) cc, cc->fsgid.val);
-	printk_deferred(KERN_INFO "[%s] securebits at %lx, offset=%lx, value=%u", mark, (void *)&(cc->securebits),(void *) &(cc->securebits) - (void *) cc, cc->securebits);
-	printk_deferred(KERN_INFO "[%s] cap_inheritable at %lx, offset=%lx, value=%lx", mark, (void *)&(cc->cap_inheritable),(void *) &(cc->cap_inheritable) - (void *) cc, cc->cap_inheritable);
-	printk_deferred(KERN_INFO "[%s] cap_permitted at %lx, offset=%lx, value=%lx", mark, (void *)&(cc->cap_permitted),(void *) &(cc->cap_permitted) - (void *) cc, cc->cap_permitted);
-	printk_deferred(KERN_INFO "[%s] cap_effective at %lx, offset=%lx, value=%lx", mark, (void *)&(cc->cap_effective),(void *) &(cc->cap_effective) - (void *) cc, cc->cap_effective);
-	printk_deferred(KERN_INFO "[%s] cap_bset at %lx, offset=%lx, value=%lx", mark, (void *)&(cc->cap_bset),(void *) &(cc->cap_bset) - (void *) cc, cc->cap_bset);
-	printk_deferred(KERN_INFO "[%s] cap_ambient at %lx, offset=%lx, value=%lx", mark, (void *)&(cc->cap_ambient),(void *) &(cc->cap_ambient) - (void *) cc, cc->cap_ambient);
-#ifdef CONFIG_KEYS
-	printk_deferred(KERN_INFO "[%s] session_keyring at %lx, offset=%lx, value=%lx", mark, (void *)&(cc->session_keyring),(void *) &(cc->session_keyring) - (void *) cc, cc->session_keyring);
-	printk_deferred(KERN_INFO "[%s] process_keyring at %lx, offset=%lx, value=%lx", mark, (void *)&(cc->process_keyring),(void *) &(cc->process_keyring) - (void *) cc, cc->process_keyring);
-	printk_deferred(KERN_INFO "[%s] thread_keyring at %lx, offset=%lx, value=%lx", mark, (void *)&(cc->thread_keyring),(void *) &(cc->thread_keyring) - (void *) cc, cc->thread_keyring);
-	printk_deferred(KERN_INFO "[%s] request_key_auth at %lx, offset=%lx, value=%lx", mark, (void *)&(cc->request_key_auth),(void *) &(cc->request_key_auth) - (void *) cc, cc->request_key_auth);
-#endif
-#ifdef CONFIG_SECURITY
-	printk_deferred(KERN_INFO "[%s] security at %lx, offset=%lx, value=%lx", mark, (void *)&(cc->security),(void *) &(cc->security) - (void *) cc, cc->security);
-	printk_deferred(KERN_INFO "[%s] CURRENT (PID=%d) TASK security value=%lx", mark, current->pid, current->security);
-#endif
-	printk_deferred(KERN_INFO "[%s] user at %lx, offset=%lx, value=%lx", mark, (void *)&(cc->user),(void *) &(cc->user) - (void *) cc, cc->user);
-	printk_deferred(KERN_INFO "[%s] user_ns at %lx, offset=%lx, value=%lx", mark, (void *)&(cc->user_ns),(void *) &(cc->user_ns) - (void *) cc, cc->user_ns);
-	printk_deferred(KERN_INFO "[%s] ucounts at %lx, offset=%lx, value=%lx", mark, (void *)&(cc->ucounts),(void *) &(cc->ucounts) - (void *) cc, cc->ucounts);
-	printk_deferred(KERN_INFO "[%s] group_info at %lx, offset=%lx, value=%lx", mark, (void *)&(cc->group_info),(void *) &(cc->group_info) - (void *) cc, cc->group_info);
-	printk_deferred(KERN_INFO "[%s] group_info->usage, value=%d", mark, cc->group_info->usage);
-	printk_deferred(KERN_INFO "[%s] group_info->ngroups, value=%d", mark, cc->group_info->ngroups);
-	for(int ii = 0; ii < cc->group_info->ngroups; ++ii) {
-		printk_deferred(KERN_INFO "[%s] group_info->gid[%d], value=%d", mark, ii, cc->group_info->gid[ii]);
-	}
-	printk_deferred(KERN_INFO "[%s] non_rcu at %lx, offset=%lx, value=%d", mark, (void *)&(cc->non_rcu),(void *) &(cc->non_rcu) - (void *) cc, cc->non_rcu);
+	// printk_deferred(KERN_INFO "[%s] uid at %lx, offset=%lx, value=%d", mark, (void *)&(cc->uid),(void *) &(cc->uid) - (void *) cc, cc->uid.val);
+	// printk_deferred(KERN_INFO "[%s] gid at %lx, offset=%lx, value=%d", mark, (void *)&(cc->gid),(void *) &(cc->gid) - (void *) cc, cc->gid.val);
+	// printk_deferred(KERN_INFO "[%s] suid at %lx, offset=%lx, value=%d", mark, (void *)&(cc->suid),(void *) &(cc->suid) - (void *) cc, cc->suid.val);
+	// printk_deferred(KERN_INFO "[%s] sgid at %lx, offset=%lx, value=%d", mark, (void *)&(cc->sgid),(void *) &(cc->sgid) - (void *) cc, cc->sgid.val);
+	// printk_deferred(KERN_INFO "[%s] euid at %lx, offset=%lx, value=%d", mark, (void *)&(cc->euid),(void *) &(cc->euid) - (void *) cc, cc->euid.val);
+	// printk_deferred(KERN_INFO "[%s] egid at %lx, offset=%lx, value=%d", mark, (void *)&(cc->egid),(void *) &(cc->egid) - (void *) cc, cc->egid.val);
+	// printk_deferred(KERN_INFO "[%s] fsuid at %lx, offset=%lx, value=%d", mark, (void *)&(cc->fsuid),(void *) &(cc->fsuid) - (void *) cc, cc->fsuid.val);
+	// printk_deferred(KERN_INFO "[%s] fsgid at %lx, offset=%lx, value=%d", mark, (void *)&(cc->fsgid),(void *) &(cc->fsgid) - (void *) cc, cc->fsgid.val);
+	// printk_deferred(KERN_INFO "[%s] securebits at %lx, offset=%lx, value=%u", mark, (void *)&(cc->securebits),(void *) &(cc->securebits) - (void *) cc, cc->securebits);
+	// printk_deferred(KERN_INFO "[%s] cap_inheritable at %lx, offset=%lx, value=%lx", mark, (void *)&(cc->cap_inheritable),(void *) &(cc->cap_inheritable) - (void *) cc, cc->cap_inheritable);
+	// printk_deferred(KERN_INFO "[%s] cap_permitted at %lx, offset=%lx, value=%lx", mark, (void *)&(cc->cap_permitted),(void *) &(cc->cap_permitted) - (void *) cc, cc->cap_permitted);
+	// printk_deferred(KERN_INFO "[%s] cap_effective at %lx, offset=%lx, value=%lx", mark, (void *)&(cc->cap_effective),(void *) &(cc->cap_effective) - (void *) cc, cc->cap_effective);
+	// printk_deferred(KERN_INFO "[%s] cap_bset at %lx, offset=%lx, value=%lx", mark, (void *)&(cc->cap_bset),(void *) &(cc->cap_bset) - (void *) cc, cc->cap_bset);
+	// printk_deferred(KERN_INFO "[%s] cap_ambient at %lx, offset=%lx, value=%lx", mark, (void *)&(cc->cap_ambient),(void *) &(cc->cap_ambient) - (void *) cc, cc->cap_ambient);
+// #ifdef CONFIG_KEYS
+// 	printk_deferred(KERN_INFO "[%s] session_keyring at %lx, offset=%lx, value=%lx", mark, (void *)&(cc->session_keyring),(void *) &(cc->session_keyring) - (void *) cc, cc->session_keyring);
+// 	printk_deferred(KERN_INFO "[%s] process_keyring at %lx, offset=%lx, value=%lx", mark, (void *)&(cc->process_keyring),(void *) &(cc->process_keyring) - (void *) cc, cc->process_keyring);
+// 	printk_deferred(KERN_INFO "[%s] thread_keyring at %lx, offset=%lx, value=%lx", mark, (void *)&(cc->thread_keyring),(void *) &(cc->thread_keyring) - (void *) cc, cc->thread_keyring);
+// 	printk_deferred(KERN_INFO "[%s] request_key_auth at %lx, offset=%lx, value=%lx", mark, (void *)&(cc->request_key_auth),(void *) &(cc->request_key_auth) - (void *) cc, cc->request_key_auth);
+// #endif
+// #ifdef CONFIG_SECURITY
+// 	printk_deferred(KERN_INFO "[%s] security at %lx, offset=%lx, value=%lx", mark, (void *)&(cc->security),(void *) &(cc->security) - (void *) cc, cc->security);
+// 	printk_deferred(KERN_INFO "[%s] CURRENT (PID=%d) TASK security value=%lx", mark, current->pid, current->security);
+// #endif
+	// printk_deferred(KERN_INFO "[%s] user at %lx, offset=%lx, value=%lx", mark, (void *)&(cc->user),(void *) &(cc->user) - (void *) cc, cc->user);
+	// printk_deferred(KERN_INFO "[%s] user_ns at %lx, offset=%lx, value=%lx", mark, (void *)&(cc->user_ns),(void *) &(cc->user_ns) - (void *) cc, cc->user_ns);
+	// printk_deferred(KERN_INFO "[%s] ucounts at %lx, offset=%lx, value=%lx", mark, (void *)&(cc->ucounts),(void *) &(cc->ucounts) - (void *) cc, cc->ucounts);
+	// printk_deferred(KERN_INFO "[%s] group_info at %lx, offset=%lx, value=%lx", mark, (void *)&(cc->group_info),(void *) &(cc->group_info) - (void *) cc, cc->group_info);
+	// printk_deferred(KERN_INFO "[%s] group_info->usage, value=%d", mark, cc->group_info->usage);
+	// printk_deferred(KERN_INFO "[%s] group_info->ngroups, value=%d", mark, cc->group_info->ngroups);
+	// for(int ii = 0; ii < cc->group_info->ngroups; ++ii) {
+	// 	printk_deferred(KERN_INFO "[%s] group_info->gid[%d], value=%d", mark, ii, cc->group_info->gid[ii]);
+	// }
+	// printk_deferred(KERN_INFO "[%s] non_rcu at %lx, offset=%lx, value=%d", mark, (void *)&(cc->non_rcu),(void *) &(cc->non_rcu) - (void *) cc, cc->non_rcu);
 #ifdef CONFIG_ARM64_PTR_AUTH_CRED_PROTECT
 	printk_deferred(KERN_INFO "[%s] sac at %lx, offset=%lx, value=%lx", mark, (void *)&(cc->sac),(void *) &(cc->sac) - (void *) cc, cc->sac);
 #endif
@@ -337,6 +323,164 @@ static void my_print_cred_values_simplified(char *mark) {
 	printk_deferred(KERN_INFO "=====Simplified Cred=====%s\ncurrent at %lx, PID=%d, PPID=%d CMD=%s\ncred at %lx\nptracer_cred at %lx\nreal_cred at %lx\n[%s] usage at %lx, offset=%lx, value=%d\n[%s] uid at %lx, offset=%lx, value=%d\n[%s] euid at %lx, offset=%lx, value=%d\n-----------------\n", mark, current, current->pid, current->real_parent->pid, current->comm, current->cred, current->ptracer_cred, current->real_cred, mark, (void *)&(current->cred->usage),(void *) &(current->cred->usage) - (void *) current->cred, atomic_read(&current->cred->usage), mark, (void *)&(current->cred->uid),(void *) &(current->cred->uid) - (void *) current->cred, current->cred->uid.val, mark, (void *)&(current->cred->euid),(void *) &(current->cred->euid) - (void *) current->cred, current->cred->euid.val);
 
 }
+//-----
+
+
+// GL [code] +
+#ifdef CONFIG_ARM64_PTR_AUTH_CRED_PROTECT
+/**
+ * get_cred_field_pac - Calculate pointer authentication code using ARMv8.3a PACGA instruction
+ * 
+ * @field_pointer The pointer to the input data
+ * @field_size The size of the data in byte, greater than 0
+ * @xm The initial value for context of PACGA instruction
+ * 
+ * This function is only for get_cred_sac, don't call it anywhere else.
+ * 
+ * Let the token "xn" be the input data for PACGA, xn is 64 bits.
+ * If field_size is 8, the data is 64 bits, perfect for PACGA.
+ * If field_size is less than 8, pad 0 for the most significant bits of xn.
+ * If field_size is greater than 8, use PACGA multiple times, 8 bytes by 8 bytees.
+ * In this case, the initial context is xm, the context for the next PACGA would be 
+ * the result of the previous PACGA instruction.
+ * 
+ * Return pointer authentication code in 64 bits. The higher 32 bits are the PAC,
+ * the lower 32 bits will always be 0. This is the raw data calculated by PACGA.
+*/
+static inline __attribute__((always_inline)) u_int64_t get_cred_field_pac(const void *field_pointer, size_t field_size, u_int64_t xm) {
+	if (field_size <= 0) {
+		return 0;
+	}
+
+	/* For copying data byte by byte */
+	char *field = (char *) field_pointer;
+	/* Loop control variable */
+	size_t total_chunk_size = 0;
+	/* Final result */
+	u_int64_t xd;
+	/* Input data for PACGA */
+	u_int64_t xn;
+	/* Temporary variable */
+	u_int64_t t;
+
+	/* The number of loop is ceil(field_size / 8) */
+	while (total_chunk_size < field_size) {
+		size_t current_chunk_size = (field_size - total_chunk_size >= 8) ? 8 : field_size - total_chunk_size;
+		xn = 0L;
+
+		/* copy data to the variable xn */
+		int i = 0;
+		for (; i < current_chunk_size; ++i) {
+			t = (u_int64_t) (*(field + i));
+			xn |= t << (8 * i);
+		}
+
+		/* PACGA instruction is for ARMv8.3a
+		 * variable xn and xm will be the input operators for PACGA
+		 * variable xd takes the result
+		 */
+		asm volatile(
+			"PACGA %[out], %[val], %[context]\n\t"
+			: [out] "=r" (xd)
+			: [val] "r" (xn), [context] "r" (xm)
+			:
+		);
+		// printk(KERN_INFO "---------------------\n");
+		// printk(KERN_INFO "xn = %lx, xm = %lx, xd = %lx\n", xn, xm, xd);
+		// printk(KERN_INFO "---------------------\n");
+		total_chunk_size += 8;
+		field += 8;
+		xm = xd;
+	}
+	return xd;
+}
+
+/**
+ * get_cred_sac - Calculate structure authentication code (SAC) for struct cred
+ * 
+ * @cred The pointer to the cred structure, it won't be changed
+ * 
+ * Only some fields of struct cred will be used for calculating SAC.
+ * The initial value of context of PACGA is the address of cred.
+ * The previous result of PACGA will be the context for the next PACGA.
+ * 
+ * Return the 32 bits of SAC
+*/
+static inline __attribute__((always_inline)) u_int32_t get_cred_sac(const struct cred *cred) {
+	
+	u_int64_t xm = (u_int64_t) cred;
+	xm = get_cred_field_pac(&cred->uid, sizeof(cred->uid), xm);
+	xm = get_cred_field_pac(&cred->gid, sizeof(cred->gid), xm);
+	xm = get_cred_field_pac(&cred->suid, sizeof(cred->suid), xm);
+	xm = get_cred_field_pac(&cred->sgid, sizeof(cred->sgid), xm);
+	xm = get_cred_field_pac(&cred->euid, sizeof(cred->euid), xm);
+	xm = get_cred_field_pac(&cred->egid, sizeof(cred->egid), xm);
+	xm = get_cred_field_pac(&cred->fsuid, sizeof(cred->fsuid), xm);
+	xm = get_cred_field_pac(&cred->fsgid, sizeof(cred->fsgid), xm);
+	xm = get_cred_field_pac(&cred->securebits, sizeof(cred->securebits), xm);
+	xm = get_cred_field_pac(&cred->cap_inheritable, sizeof(cred->cap_inheritable), xm);
+	xm = get_cred_field_pac(&cred->cap_permitted, sizeof(cred->cap_permitted), xm);
+	xm = get_cred_field_pac(&cred->cap_effective, sizeof(cred->cap_effective), xm);
+	xm = get_cred_field_pac(&cred->cap_bset, sizeof(cred->cap_bset), xm);
+	xm = get_cred_field_pac(&cred->cap_ambient, sizeof(cred->cap_ambient), xm);
+	xm = get_cred_field_pac(&cred->user, sizeof(cred->user), xm);
+	xm = get_cred_field_pac(&cred->user_ns, sizeof(cred->user_ns), xm);
+	xm = get_cred_field_pac(&cred->ucounts, sizeof(cred->ucounts), xm);
+	xm = get_cred_field_pac(&cred->group_info, sizeof(cred->group_info), xm);
+	xm = get_cred_field_pac(&cred->rcu, sizeof(cred->rcu), xm);
+	
+	return xm >> 32;
+}
+
+/**
+ * sac_sign_cred - Sign a cred structure
+ * 
+ * @cred is the point to the credential structure
+ * 
+ * Nothing will return, but the "sac" filed in cred will be changd
+*/
+static inline __attribute__((always_inline)) void sac_sign_cred(struct cred *cred, char *info) {
+	u_int32_t sac = get_cred_sac(cred);
+	cred -> sac = sac;
+	printk_deferred(KERN_INFO "SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS");
+	printk_deferred(KERN_INFO "[%s] cred is at %lx, pid=%d, correct sac=%x", info, cred, current->pid, sac);
+	my_print_cred_values_by_pointer(cred, "Sign");
+	printk_deferred(KERN_INFO "SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS");
+}
+
+/**
+ * sac_validate_cred - Validate the SAC of a cred structure
+ * 
+ * @cred is the point to the credential structure, it won't be changed
+ * 
+ * Calculate the SAC again.
+ * 
+ * Return the address of cred if matched; kerenl panic will be triggered if not mathced
+*/
+static inline __attribute__((always_inline)) struct cred * sac_validate_cred(const struct cred *cred, char *info) {
+	u_int32_t sac = get_cred_sac(cred);
+	if (cred -> sac == sac) {
+	printk_deferred(KERN_INFO "VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV");
+	printk_deferred(KERN_INFO "[%s] cred is at %lx, pid=%d, correct sac=%x", info, cred, current->pid, sac);
+	printk_deferred(KERN_INFO "VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV");
+		return cred;
+	}
+	// panic("Cred struct (%p) integirty check failed\n", cred);
+	printk_deferred(KERN_INFO "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+	printk_deferred(KERN_INFO "[%s] cred is at %lx, pid=%d, correct sac=%x", info, cred, current->pid, sac);
+	my_print_cred_values_by_pointer(cred, "Validation Error");
+	printk_deferred(KERN_INFO "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+	return cred;
+}
+#else
+static void sac_sign_cred(struct cred *) {
+
+}
+
+static struct cred * sac_validate_cred(const struct cred *) {
+	return NULL;
+}
+#endif
 //-----
 
 /*
