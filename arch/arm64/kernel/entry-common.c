@@ -643,9 +643,9 @@ static void noinstr el0_dbg(struct pt_regs *regs, unsigned long esr)
 static void noinstr el0_svc(struct pt_regs *regs)
 {
 	// GL [DEBUG] +
-	printk_deferred(KERN_INFO "+");
-	printk_deferred(KERN_INFO "el0_sve PID=%d", current->pid);
-	printk_deferred(KERN_INFO "-");
+	// printk_deferred(KERN_INFO "+");
+	// printk_deferred(KERN_INFO "el0_sve PID=%d", current->pid);
+	// printk_deferred(KERN_INFO "-");
 	//-----
 	enter_from_user_mode(regs);
 	cortex_a76_erratum_1463225_svc_handler();

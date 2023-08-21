@@ -587,6 +587,7 @@ EXPORT_SYMBOL(commit_creds);
  * Discard a set of credentials that were under construction and unlock the
  * current task.
  */
+// GL probably we don't want to validate here, as the newly created structure hasn't been signed 
 void abort_creds(struct cred *new)
 {
 	kdebug("abort_creds(%p{%d,%d})", new,

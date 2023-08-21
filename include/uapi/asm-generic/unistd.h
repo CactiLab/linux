@@ -851,12 +851,15 @@ __SYSCALL(__NR_myinfoprint, sys_myinfoprint)
 #define __NR_mychangecred 461
 __SYSCALL(__NR_mychangecred, sys_mychangecred)
 
+#define __NR_mytouchuid 462
+__SYSCALL(__NR_mytouchuid, sys_mytouchuid)
+
 // -----
 
 #undef __NR_syscalls
 // Gl [DEBUG] +
 // #define __NR_syscalls 452
-#define __NR_syscalls 462
+#define __NR_syscalls 463
 //-----
 
 /*

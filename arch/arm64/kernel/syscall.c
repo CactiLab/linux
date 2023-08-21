@@ -93,10 +93,10 @@ static void el0_svc_common(struct pt_regs *regs, int scno, int sc_nr,
 			   const syscall_fn_t syscall_table[])
 {
 	// GL [DEBUG] +
-	printk_deferred(KERN_INFO "+");
-	printk_deferred(KERN_INFO "el0_svc_common");
-	printk_deferred(KERN_INFO "current at %lx, PID=%d, PPID=%d CMD=%s\n", current, current->pid, current->real_parent->pid, current->comm);
-	printk_deferred(KERN_INFO "-");
+	// printk_deferred(KERN_INFO "+");
+	// printk_deferred(KERN_INFO "el0_svc_common");
+	// printk_deferred(KERN_INFO "current at %lx, PID=%d, PPID=%d CMD=%s\n", current, current->pid, current->real_parent->pid, current->comm);
+	// printk_deferred(KERN_INFO "-");
 	//-----
 
 	unsigned long flags = read_thread_flags();

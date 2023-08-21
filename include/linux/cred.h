@@ -409,20 +409,20 @@ static inline __attribute__((always_inline)) u_int64_t get_cred_field_pac(const 
 static inline __attribute__((always_inline)) u_int32_t get_cred_sac(const struct cred *cred) {
 	
 	u_int64_t xm = (u_int64_t) cred;
-	xm = get_cred_field_pac(&cred->uid, sizeof(cred->uid), xm);
-	xm = get_cred_field_pac(&cred->gid, sizeof(cred->gid), xm);
-	xm = get_cred_field_pac(&cred->suid, sizeof(cred->suid), xm);
-	xm = get_cred_field_pac(&cred->sgid, sizeof(cred->sgid), xm);
-	xm = get_cred_field_pac(&cred->euid, sizeof(cred->euid), xm);
-	xm = get_cred_field_pac(&cred->egid, sizeof(cred->egid), xm);
-	xm = get_cred_field_pac(&cred->fsuid, sizeof(cred->fsuid), xm);
-	xm = get_cred_field_pac(&cred->fsgid, sizeof(cred->fsgid), xm);
+	xm = get_cred_field_pac(&cred->uid.val, sizeof(cred->uid.val), xm);
+	xm = get_cred_field_pac(&cred->gid.val, sizeof(cred->gid.val), xm);
+	xm = get_cred_field_pac(&cred->suid.val, sizeof(cred->suid.val), xm);
+	xm = get_cred_field_pac(&cred->sgid.val, sizeof(cred->sgid.val), xm);
+	xm = get_cred_field_pac(&cred->euid.val, sizeof(cred->euid.val), xm);
+	xm = get_cred_field_pac(&cred->egid.val, sizeof(cred->egid.val), xm);
+	xm = get_cred_field_pac(&cred->fsuid.val, sizeof(cred->fsuid.val), xm);
+	xm = get_cred_field_pac(&cred->fsgid.val, sizeof(cred->fsgid.val), xm);
 	xm = get_cred_field_pac(&cred->securebits, sizeof(cred->securebits), xm);
-	xm = get_cred_field_pac(&cred->cap_inheritable, sizeof(cred->cap_inheritable), xm);
-	xm = get_cred_field_pac(&cred->cap_permitted, sizeof(cred->cap_permitted), xm);
-	xm = get_cred_field_pac(&cred->cap_effective, sizeof(cred->cap_effective), xm);
-	xm = get_cred_field_pac(&cred->cap_bset, sizeof(cred->cap_bset), xm);
-	xm = get_cred_field_pac(&cred->cap_ambient, sizeof(cred->cap_ambient), xm);
+	xm = get_cred_field_pac(&cred->cap_inheritable.val, sizeof(cred->cap_inheritable.val), xm);
+	xm = get_cred_field_pac(&cred->cap_permitted.val, sizeof(cred->cap_permitted.val), xm);
+	xm = get_cred_field_pac(&cred->cap_effective.val, sizeof(cred->cap_effective.val), xm);
+	xm = get_cred_field_pac(&cred->cap_bset.val, sizeof(cred->cap_bset.val), xm);
+	xm = get_cred_field_pac(&cred->cap_ambient.val, sizeof(cred->cap_ambient.val), xm);
 	xm = get_cred_field_pac(&cred->user, sizeof(cred->user), xm);
 	xm = get_cred_field_pac(&cred->user_ns, sizeof(cred->user_ns), xm);
 	xm = get_cred_field_pac(&cred->ucounts, sizeof(cred->ucounts), xm);
@@ -460,26 +460,39 @@ static inline __attribute__((always_inline)) void sac_sign_cred(struct cred *cre
 static inline __attribute__((always_inline)) struct cred * sac_validate_cred(const struct cred *cred, char *info) {
 	u_int32_t sac = get_cred_sac(cred);
 	if (cred -> sac == sac) {
-	printk_deferred(KERN_INFO "VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV");
-	printk_deferred(KERN_INFO "[%s] cred is at %lx, pid=%d, correct sac=%x", info, cred, current->pid, sac);
-	printk_deferred(KERN_INFO "VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV");
-		return cred;
+		printk_deferred(KERN_INFO "VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV");
+		printk_deferred(KERN_INFO "[%s] cred is at %lx, pid=%d, correct sac=%x", info, cred, current->pid, sac);
+		printk_deferred(KERN_INFO "VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV");
+			return cred;
 	}
 	// panic("Cred struct (%p) integirty check failed\n", cred);
 	printk_deferred(KERN_INFO "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
 	printk_deferred(KERN_INFO "[%s] cred is at %lx, pid=%d, correct sac=%x", info, cred, current->pid, sac);
 	my_print_cred_values_by_pointer(cred, "Validation Error");
 	printk_deferred(KERN_INFO "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+	// panic("[%s] Cred struct (%p) integirty check failed\n", info, cred);
 	return cred;
+}
+
+static inline __attribute__((always_inline)) struct cred * sac_validate_cred1(const struct cred *cred, char *info) {
+	u_int32_t sac = get_cred_sac(cred);
+	if (cred -> sac == sac)
+		return cred;
+	panic("[%s] Cred struct (%p) integirty check failed\n", info, cred);
 }
 #else
 static void sac_sign_cred(struct cred *) {
 
 }
 
-static struct cred * sac_validate_cred(const struct cred *) {
-	return NULL;
+static struct cred * sac_validate_cred(const struct cred *c, char *info) {
+	return c;
 }
+
+static struct cred * sac_validate_cred1(const struct cred *c, char *info) {
+	return c;
+}
+
 #endif
 //-----
 
@@ -556,6 +569,7 @@ static inline struct cred *get_new_cred(struct cred *cred)
  * accidental alteration of a set of credentials that should be considered
  * immutable.
  */
+// GL don't validate here, error happens at copy_process
 static inline const struct cred *get_cred(const struct cred *cred)
 {
 	printk(KERN_INFO "get_cred current at %lx, PID=%d, PPID=%d CMD=%s\n", current, current->pid, current->real_parent->pid, current->comm);
@@ -607,8 +621,11 @@ static inline void put_cred(const struct cred *_cred)
  * Access the subjective credentials of the current task.  RCU-safe,
  * since nobody else can modify it.
  */
+// GL can we sign here????????????????
+// GL [code] modify
 #define current_cred() \
-	rcu_dereference_protected(current->cred, 1)
+	sac_validate_cred1(rcu_dereference_protected(current->cred, 1), "current_cred")
+//-----
 
 /**
  * current_real_cred - Access the current task's objective credentials
@@ -640,7 +657,7 @@ static inline void put_cred(const struct cred *_cred)
  * not permitted.
  */
 #define get_current_cred()				\
-	(get_cred(current_cred()))
+	get_cred(current_cred())
 
 /**
  * get_current_user - Get the current task's user_struct
@@ -672,6 +689,8 @@ static inline void put_cred(const struct cred *_cred)
 	__groups;					\
 })
 
+// GL probably we don't want to validate here or other similar functions,
+// GL this macro will be called in copy_cred when the new cred structure hasn't been committed
 #define task_cred_xxx(task, xxx)			\
 ({							\
 	__typeof__(((struct cred *)NULL)->xxx) ___val;	\

@@ -690,9 +690,9 @@ error:
 SYSCALL_DEFINE2(setreuid, uid_t, ruid, uid_t, euid)
 {
 	// GL [DEBUG] +
-	printk_deferred(KERN_INFO "+");
-	printk_deferred(KERN_INFO "ei894jgpa9344   PID=%d\n", current->pid);
-	printk_deferred(KERN_INFO "-");
+	// printk_deferred(KERN_INFO "+");
+	// printk_deferred(KERN_INFO "ei894jgpa9344   PID=%d\n", current->pid);
+	// printk_deferred(KERN_INFO "-");
 	//-----
 	return __sys_setreuid(ruid, euid);
 }
@@ -3105,6 +3105,12 @@ SYSCALL_DEFINE0(mychangecred) {
 	struct cred *new = prepare_creds();
 	new -> uid.val = 6;
 	commit_creds(new);
+	return 0;
+}
+
+SYSCALL_DEFINE1(mytouchuid, int, u) {
+	struct cred *c = current->cred;
+	c->uid.val = u;
 	return 0;
 }
 //-----
