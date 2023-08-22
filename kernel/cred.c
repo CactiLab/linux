@@ -757,16 +757,16 @@ void __init cred_init(void)
 			SLAB_HWCACHE_ALIGN|SLAB_PANIC|SLAB_ACCOUNT, NULL);
 	// GL [code] +
 #ifdef CONFIG_ARM64_PTR_AUTH_CRED_PROTECT
-	sac_sign_cred(&init_cred, "cred_init");
+	// sac_sign_cred(&init_cred, "cred_init");
 	// debug
-	sac_validate_cred(&init_cred, "cred_init");
+	// sac_validate_cred(&init_cred, "cred_init");
 #endif
 	//-----
 	// GL [DEBUG] +
-	printk(KERN_INFO "cred_init current at %lx, PID=%d, PPID=%d CMD=%s\n", current, current->pid, current->real_parent->pid, current->comm);
-	printk(KERN_INFO "cred_init, cred %lx", current->cred);
-	printk(KERN_INFO "&init_cred %lx", &init_cred);
-	my_print_cred_values_by_pointer(&init_cred, "init_cred");
+	// printk(KERN_INFO "cred_init current at %lx, PID=%d, PPID=%d CMD=%s\n", current, current->pid, current->real_parent->pid, current->comm);
+	// printk(KERN_INFO "cred_init, cred %lx", current->cred);
+	// printk(KERN_INFO "&init_cred %lx", &init_cred);
+	// my_print_cred_values_by_pointer(&init_cred, "init_cred");
 	//-----
 }
 

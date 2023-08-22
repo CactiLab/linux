@@ -1054,6 +1054,9 @@ void start_kernel(void)
 #endif
 	thread_stack_cache_init();
 	cred_init();
+	// GL [code] +
+	sac_sign_cred(init_task.cred, "cred_init");
+	//-----
 	fork_init();
 	proc_caches_init();
 	uts_ns_init();
