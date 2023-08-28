@@ -997,6 +997,8 @@ void start_kernel(void)
 	printk(KERN_INFO "&init_task is at %lx", &init_task);
 	printk(KERN_INFO "sizeof(cred)=%d", sizeof(struct cred));
 	printk(KERN_INFO "sizeof(cred->user)=%d", sizeof(current->cred->user));
+	printk(KERN_INFO "sizeof(int)=%d", sizeof(int));
+	printk(KERN_INFO "sizeof(struct rcu_head)=%d", sizeof(struct rcu_head));
 	//-----
 	perf_event_init();
 	profile_init();

@@ -281,7 +281,11 @@ struct cred *prepare_creds(void)
 	printk(KERN_INFO "[prepare_creds] cred new: %lx", new);
 	printk(KERN_INFO "-");
 	//-----
-	memcpy(new, old, sizeof(struct cred));
+	// GL [code] original
+	// memcpy(new, old, sizeof(struct cred));
+	// GL [code] +
+	validate_cred_copy(new, old);
+	//-----
 
 	new->non_rcu = 0;
 	atomic_set(&new->usage, 1);

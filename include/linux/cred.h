@@ -23,6 +23,9 @@ struct inode;
  * COW Supplementary groups list
  */
 struct group_info {
+	#ifdef CONFIG_ARM64_PTR_AUTH_CRED_PROTECT_GROUP_INFO
+	u_int32_t sac;
+	#endif
 	atomic_t	usage;
 	int		ngroups;
 	kgid_t		gid[];
@@ -151,7 +154,7 @@ struct cred {
 		struct rcu_head	rcu;		/* RCU deletion hook */
 	};
 	// GL [code] +
-#ifdef CONFIG_ARM64_PTR_AUTH_CRED_PROTECT
+#ifdef CONFIG_ARM64_PTR_AUTH_CRED_PROTECT_CRED
 	u_int32_t sac;				/* store the structure authentication code (SAC) of this cred structure, including tradition creds, capabilities, pointers to other structures. Not reference counters */
 #endif
 	//-----
@@ -395,6 +398,7 @@ static inline __attribute__((always_inline)) u_int64_t get_cred_field_pac(const 
 	return xd;
 }
 
+#ifdef CONFIG_ARM64_PTR_AUTH_CRED_PROTECT_CRED
 /**
  * get_cred_sac - Calculate structure authentication code (SAC) for struct cred
  * 
@@ -423,11 +427,22 @@ static inline __attribute__((always_inline)) u_int32_t get_cred_sac(const struct
 	xm = get_cred_field_pac(&cred->cap_effective.val, sizeof(cred->cap_effective.val), xm);
 	xm = get_cred_field_pac(&cred->cap_bset.val, sizeof(cred->cap_bset.val), xm);
 	xm = get_cred_field_pac(&cred->cap_ambient.val, sizeof(cred->cap_ambient.val), xm);
+#ifdef CONFIG_KEYS
+	xm = get_cred_field_pac(&cred->jit_keyring, sizeof(cred->jit_keyring), xm);
+	xm = get_cred_field_pac(&cred->session_keyring, sizeof(cred->session_keyring), xm);
+	xm = get_cred_field_pac(&cred->process_keyring, sizeof(cred->process_keyring), xm);
+	xm = get_cred_field_pac(&cred->thread_keyring, sizeof(cred->thread_keyring), xm);
+	xm = get_cred_field_pac(&cred->request_key_auth, sizeof(cred->request_key_auth), xm);
+#endif
+#ifdef CONFIG_SECURITY
+	xm = get_cred_field_pac(&cred->security, sizeof(cred->security), xm);
+#endif
 	xm = get_cred_field_pac(&cred->user, sizeof(cred->user), xm);
 	xm = get_cred_field_pac(&cred->user_ns, sizeof(cred->user_ns), xm);
 	xm = get_cred_field_pac(&cred->ucounts, sizeof(cred->ucounts), xm);
 	xm = get_cred_field_pac(&cred->group_info, sizeof(cred->group_info), xm);
-	xm = get_cred_field_pac(&cred->rcu, sizeof(cred->rcu), xm);
+	xm = get_cred_field_pac(&cred->rcu.next, sizeof(cred->rcu.next), xm);
+	xm = get_cred_field_pac(&cred->rcu.func, sizeof(cred->rcu.func), xm);
 	
 	return xm >> 32;
 }
@@ -470,7 +485,7 @@ static inline __attribute__((always_inline)) struct cred * sac_validate_cred(con
 	printk_deferred(KERN_INFO "[%s] cred is at %lx, pid=%d, correct sac=%x", info, cred, current->pid, sac);
 	my_print_cred_values_by_pointer(cred, "Validation Error");
 	printk_deferred(KERN_INFO "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
-	// panic("[%s] Cred struct (%p) integirty check failed\n", info, cred);
+	panic("[%s] Cred struct (%p) integirty check failed\n", info, cred);
 	return cred;
 }
 
@@ -480,6 +495,79 @@ static inline __attribute__((always_inline)) struct cred * sac_validate_cred1(co
 		return cred;
 	panic("[%s] Cred struct (%p) integirty check failed\n", info, cred);
 }
+
+static inline __attribute__((always_inline)) void validate_cred_copy(struct cred *new_cred, struct cred *old_cred) {
+	atomic_set(&new_cred->usage, atomic_read(&old_cred->usage));	// probably not necessary
+#ifdef CONFIG_DEBUG_CREDENTIALS
+	atomic_set(&new_cred->subscribers, atomic_read(&old_cred->subscribers));
+	new_cred->put_addr = old_cred->put_addr;
+	new_cred->magic = old_cred->magic;
+#endif
+	u_int64_t xm = (u_int64_t) old_cred;
+	new_cred->uid.val = old_cred->uid.val;
+	xm = get_cred_field_pac(&old_cred->uid.val, sizeof(old_cred->uid.val), xm);
+	new_cred->gid.val = old_cred->gid.val;
+	xm = get_cred_field_pac(&old_cred->gid.val, sizeof(old_cred->gid.val), xm);
+	new_cred->suid.val = old_cred->suid.val;
+	xm = get_cred_field_pac(&old_cred->suid.val, sizeof(old_cred->suid.val), xm);
+	new_cred->sgid.val = old_cred->sgid.val;
+	xm = get_cred_field_pac(&old_cred->sgid.val, sizeof(old_cred->sgid.val), xm);
+	new_cred->euid.val = old_cred->euid.val;
+	xm = get_cred_field_pac(&old_cred->euid.val, sizeof(old_cred->euid.val), xm);
+	new_cred->egid.val = old_cred->egid.val;
+	xm = get_cred_field_pac(&old_cred->egid.val, sizeof(old_cred->egid.val), xm);
+	new_cred->fsuid.val = old_cred->fsuid.val;
+	xm = get_cred_field_pac(&old_cred->fsuid.val, sizeof(old_cred->fsuid.val), xm);
+	new_cred->fsgid.val = old_cred->fsgid.val;
+	xm = get_cred_field_pac(&old_cred->fsgid.val, sizeof(old_cred->fsgid.val), xm);
+	new_cred->securebits = old_cred->securebits;
+	xm = get_cred_field_pac(&old_cred->securebits, sizeof(old_cred->securebits), xm);
+	new_cred->cap_inheritable.val = old_cred->cap_inheritable.val;
+	xm = get_cred_field_pac(&old_cred->cap_inheritable.val, sizeof(old_cred->cap_inheritable.val), xm);
+	new_cred->cap_permitted.val = old_cred->cap_permitted.val;
+	xm = get_cred_field_pac(&old_cred->cap_permitted.val, sizeof(old_cred->cap_permitted.val), xm);
+	new_cred->cap_effective.val = old_cred->cap_effective.val;
+	xm = get_cred_field_pac(&old_cred->cap_effective.val, sizeof(old_cred->cap_effective.val), xm);
+	new_cred->cap_bset.val = old_cred->cap_bset.val;
+	xm = get_cred_field_pac(&old_cred->cap_bset.val, sizeof(old_cred->cap_bset.val), xm);
+	new_cred->cap_ambient.val = old_cred->cap_ambient.val;
+	xm = get_cred_field_pac(&old_cred->cap_ambient.val, sizeof(old_cred->cap_ambient.val), xm);
+#ifdef CONFIG_KEYS
+	new_cred->jit_keyring = old_cred->jit_keyring;
+	xm = get_cred_field_pac(&old_cred->jit_keyring, sizeof(old_cred->jit_keyring), xm);
+	new_cred->session_keyring = old_cred->session_keyring;
+	xm = get_cred_field_pac(&old_cred->session_keyring, sizeof(old_cred->session_keyring), xm);
+	new_cred->process_keyring = old_cred->process_keyring;
+	xm = get_cred_field_pac(&old_cred->process_keyring, sizeof(old_cred->process_keyring), xm);
+	new_cred->thread_keyring = old_cred->thread_keyring;
+	xm = get_cred_field_pac(&old_cred->thread_keyring, sizeof(old_cred->thread_keyring), xm);
+	new_cred->request_key_auth = old_cred->request_key_auth;
+	xm = get_cred_field_pac(&old_cred->request_key_auth, sizeof(old_cred->request_key_auth), xm);
+#endif
+#ifdef CONFIG_SECURITY
+	new_cred->security = old_cred->security;
+	xm = get_cred_field_pac(&old_cred->security, sizeof(old_cred->security), xm);
+#endif
+	new_cred->user = old_cred->user;
+	xm = get_cred_field_pac(&old_cred->user, sizeof(old_cred->user), xm);
+	new_cred->user_ns = old_cred->user_ns;
+	xm = get_cred_field_pac(&old_cred->user_ns, sizeof(old_cred->user_ns), xm);
+	new_cred->ucounts = old_cred->ucounts;
+	xm = get_cred_field_pac(&old_cred->ucounts, sizeof(old_cred->ucounts), xm);
+	new_cred->group_info = old_cred->group_info;
+	xm = get_cred_field_pac(&old_cred->group_info, sizeof(old_cred->group_info), xm);
+	new_cred->rcu.next = old_cred->rcu.next;
+	xm = get_cred_field_pac(&old_cred->rcu.next, sizeof(old_cred->rcu.next), xm);
+	new_cred->rcu.func = old_cred->rcu.func;
+	xm = get_cred_field_pac(&old_cred->rcu.func, sizeof(old_cred->rcu.func), xm);
+	
+	new_cred->sac = 0;
+
+	if (old_cred->sac != (u_int32_t) (xm >> 32)) {
+		panic("In validate_cred_copy, validation failed, cred is at %lx", old_cred);
+	}
+}
+
 #else
 static void sac_sign_cred(struct cred *) {
 
@@ -493,6 +581,39 @@ static struct cred * sac_validate_cred1(const struct cred *c, char *info) {
 	return c;
 }
 
+static inline __attribute__((always_inline)) void validate_cred_copy(struct cred *new_cred, struct cred *old_cred) {
+	memcpy(new_cred, old_cred, sizeof(struct cred));
+}
+#endif
+
+#ifdef CONFIG_ARM64_PTR_AUTH_CRED_PROTECT_GROUP_INFO
+static inline __attribute__((always_inline)) u_int32_t get_group_info_sac(const struct group_info *g) {
+	u_int64_t xm = (u_int64_t) g;
+	xm = get_cred_field_pac(&g->ngroups, sizeof(int), xm);
+	xm = get_cred_field_pac(g->gid, sizeof(kgid_t) * g->ngroups , xm);
+	return xm >> 32;
+}
+
+static inline __attribute__((always_inline)) void sac_sign_group_info(struct group_info *g, char *info) {
+	u_int32_t sac = get_group_info_sac(g);
+	g -> sac = sac;
+}
+
+static inline __attribute__((always_inline)) struct group_info * sac_validate_group_info(const struct group_info *g, char *info) {
+	u_int32_t sac = get_group_info_sac(g);
+	if (g -> sac == sac)
+		return g;
+	panic("group_info struct (%p) integirty check failed\n", g);
+}
+#else
+static void sac_sign_group_info(struct group_info *g, char *info) {
+
+}
+
+static struct group_info * sac_validate_group_info(const struct group_info *g, char *info) {
+	return g;
+}
+#endif
 #endif
 //-----
 
