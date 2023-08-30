@@ -264,13 +264,13 @@ struct cred *prepare_creds(void)
 	kdebug("prepare_creds() alloc %p", new);
 	
 	// GL [code] original
-	// old = task->cred;
-	// GL [code] +
-#ifdef CONFIG_ARM64_PTR_AUTH_CRED_PROTECT
-	old = sac_validate_cred(task->cred, "prepare_creds");
-#else
 	old = task->cred;
-#endif
+	// GL [code] +
+// #ifdef CONFIG_ARM64_PTR_AUTH_CRED_PROTECT
+// 	old = sac_validate_cred(task->cred, "prepare_creds");
+// #else
+// 	old = task->cred;
+// #endif
 	//-----
 	// GL
 	printk(KERN_INFO "+");
