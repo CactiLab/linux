@@ -1391,6 +1391,10 @@ EXPORT_SYMBOL(file_open_root);
 static long do_sys_openat2(int dfd, const char __user *filename,
 			   struct open_how *how)
 {
+	// GL [DEBUG] +
+	printk_deferred(KERN_INFO "in do_sys_openat2");
+	// printk_deferred(KERN_INFO "dfd=%d, filename=%s", dfd, filename);
+	//-----
 	struct open_flags op;
 	int fd = build_open_flags(how, &op);
 	struct filename *tmp;
@@ -1404,7 +1408,13 @@ static long do_sys_openat2(int dfd, const char __user *filename,
 
 	fd = get_unused_fd_flags(how->flags);
 	if (fd >= 0) {
+		// GL [DEBUG] +
+		printk_deferred(KERN_INFO "before do_filp_open");
+		//-----
 		struct file *f = do_filp_open(dfd, tmp, &op);
+		// GL [DEBUG] +
+		printk_deferred(KERN_INFO "after do_filp_open");
+		//-----		
 		if (IS_ERR(f)) {
 			put_unused_fd(fd);
 			fd = PTR_ERR(f);
@@ -1433,6 +1443,10 @@ SYSCALL_DEFINE3(open, const char __user *, filename, int, flags, umode_t, mode)
 SYSCALL_DEFINE4(openat, int, dfd, const char __user *, filename, int, flags,
 		umode_t, mode)
 {
+	// GL [DEBUG] +
+	printk_deferred(KERN_INFO "//////in openat/////");
+	// printk_deferred(KERN_INFO "dfd=%d, filename=%s, flags=%d, mode=%d", dfd, filename, flags, mode);
+	//-----
 	if (force_o_largefile())
 		flags |= O_LARGEFILE;
 	return do_sys_open(dfd, filename, flags, mode);

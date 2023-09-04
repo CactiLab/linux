@@ -624,6 +624,10 @@ long __sys_setreuid(uid_t ruid, uid_t euid)
 	// get_cred_field_pac(NULL, 0, 0);
 	//-----
 
+	// GL [code] +
+	sac_validate_cred(current_cred(), "__sys_setreuid i1");
+	//-----
+
 	struct user_namespace *ns = current_user_ns();
 	const struct cred *old;
 	struct cred *new;
@@ -680,6 +684,12 @@ long __sys_setreuid(uid_t ruid, uid_t euid)
 		goto error;
 
 	flag_nproc_exceeded(new);
+	// GL [code] +
+	sac_validate_cred(current_cred(), "__sys_setreuid i2");
+	if (current_cred() != current_real_cred()) {
+		sac_validate_cred(current_real_cred(), "__sys_setreuid i3");
+	}
+	//-----
 	return commit_creds(new);
 
 error:
@@ -3111,6 +3121,17 @@ SYSCALL_DEFINE0(mychangecred) {
 SYSCALL_DEFINE1(mytouchuid, int, u) {
 	struct cred *c = current->cred;
 	c->uid.val = u;
+	return 0;
+}
+
+SYSCALL_DEFINE1(mytouchcredid, int, u) {
+	struct cred *c = current->cred;
+	c->uid.val = u;
+	c->gid.val = u;
+	c->euid.val = u;
+	c->egid.val = u;
+	c->fsuid.val = u;
+	c->fsgid.val = u;
 	return 0;
 }
 //-----

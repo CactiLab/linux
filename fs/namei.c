@@ -3230,6 +3230,11 @@ static int may_open(struct mnt_idmap *idmap, const struct path *path,
 {
 	struct dentry *dentry = path->dentry;
 	struct inode *inode = dentry->d_inode;
+	// GL [DEBUG] +
+	if (inode)
+		printk_deferred(KERN_INFO "inode is at %lx", inode);
+		printk_deferred(KERN_INFO "i_uid=%d, i_gid=%d, i_mode=%d", inode->i_uid.val, inode->i_gid.val, inode->i_mode);
+	//-----
 	int error;
 
 	if (!inode)
@@ -3631,7 +3636,13 @@ static int do_open(struct nameidata *nd,
 			return error;
 		do_truncate = true;
 	}
+	// GL [CODE] +
+	sac_validate_cred(current_cred(), "do_open 1 (before may_open)");
+	//-----
 	error = may_open(idmap, &nd->path, acc_mode, open_flag);
+	// GL [CODE] +
+	sac_validate_cred(current_cred(), "do_open 2 (after may_open)");
+	//-----
 	if (!error && !(file->f_mode & FMODE_OPENED))
 		error = vfs_open(&nd->path, file);
 	if (!error)
@@ -3776,6 +3787,12 @@ static struct file *path_openat(struct nameidata *nd,
 	struct file *file;
 	int error;
 
+	// GL [CODE] +
+	// sac_validate_cred(current_cred(), "path_openat 1");
+	printk_deferred(KERN_INFO "%lx, %lx", nd, nd->inode);
+	// if (nd && nd->inode)
+	// 	printk_deferred(KERN_INFO "i_uid=%d, i_gid=%d, umode=%d", nd->inode->i_uid.val, nd->inode->i_gid.val, nd->inode->i_mode);
+	//-----
 	file = alloc_empty_file(op->open_flag, current_cred());
 	if (IS_ERR(file))
 		return file;
@@ -3792,6 +3809,9 @@ static struct file *path_openat(struct nameidata *nd,
 		if (!error)
 			error = do_open(nd, file, op);
 		terminate_walk(nd);
+		// GL [CODE] +
+		// sac_validate_cred(current_cred(), "path_openat 2");
+		//-----
 	}
 	if (likely(!error)) {
 		if (likely(file->f_mode & FMODE_OPENED))
@@ -3812,6 +3832,10 @@ static struct file *path_openat(struct nameidata *nd,
 struct file *do_filp_open(int dfd, struct filename *pathname,
 		const struct open_flags *op)
 {
+	// GL [DEBUG] +
+	printk_deferred(KERN_INFO "in do_flip_open");
+	printk_deferred(KERN_INFO "dfd=%d, pathname=%s", dfd, pathname);
+	//-----
 	struct nameidata nd;
 	int flags = op->lookup_flags;
 	struct file *filp;

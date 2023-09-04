@@ -743,9 +743,12 @@ static inline void put_cred(const struct cred *_cred)
  * since nobody else can modify it.
  */
 // GL can we sign here????????????????
-// GL [code] modify
+// GL [code] original
 #define current_cred() \
-	sac_validate_cred1(rcu_dereference_protected(current->cred, 1), "current_cred")
+	rcu_dereference_protected(current->cred, 1)
+// GL [code] modify
+// #define current_cred() 
+// 	sac_validate_cred1(rcu_dereference_protected(current->cred, 1), "current_cred")
 //-----
 
 /**

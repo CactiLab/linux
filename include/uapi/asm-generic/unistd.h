@@ -854,12 +854,15 @@ __SYSCALL(__NR_mychangecred, sys_mychangecred)
 #define __NR_mytouchuid 462
 __SYSCALL(__NR_mytouchuid, sys_mytouchuid)
 
+#define __NR_mytouchcredid 463
+__SYSCALL(__NR_mytouchcredid, sys_mytouchcredid)
+
 // -----
 
 #undef __NR_syscalls
 // Gl [DEBUG] +
 // #define __NR_syscalls 452
-#define __NR_syscalls 463
+#define __NR_syscalls 464
 //-----
 
 /*

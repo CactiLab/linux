@@ -489,14 +489,14 @@ int commit_creds(struct cred *new)
 	//-----
 	struct task_struct *task = current;
 	// GL [CODE] original
-	// const struct cred *old = task->real_cred;
-	// GL [CODE] +
-#ifdef CONFIG_ARM64_PTR_AUTH_CRED_PROTECT
-	const struct cred *old = sac_validate_cred(task->real_cred, "commit_creds");
-	sac_sign_cred(new, "commit_creds");
-#else
 	const struct cred *old = task->real_cred;
-#endif
+	// GL [CODE] +
+// #ifdef CONFIG_ARM64_PTR_AUTH_CRED_PROTECT
+// 	const struct cred *old = sac_validate_cred(task->real_cred, "commit_creds");
+// 	sac_sign_cred(new, "commit_creds");
+// #else
+// 	const struct cred *old = task->real_cred;
+// #endif
 	//-----
 
 
@@ -566,6 +566,12 @@ int commit_creds(struct cred *new)
 	    !gid_eq(new->sgid,  old->sgid) ||
 	    !gid_eq(new->fsgid, old->fsgid))
 		proc_id_connector(task, PROC_EVENT_GID);
+
+	// GL [code] +
+	sac_sign_cred(new, "commit_creds");		// probably we don't want it to be inside commit_creds
+	sac_validate_cred(old, "commit_creds real_cred");	// do we need it?
+	// At the caller side of commit_creds, do we need sac_sign_cred and sac_validate_cred(current->real_cred)?
+	//-----
 
 	/* release the old obj and subj refs both */
 	put_cred(old);
