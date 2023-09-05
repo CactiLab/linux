@@ -566,6 +566,10 @@ static inline __attribute__((always_inline)) void validate_cred_copy(struct cred
 	if (old_cred->sac != (u_int32_t) (xm >> 32)) {
 		panic("In validate_cred_copy, validation failed, cred is at %lx", old_cred);
 	}
+
+	printk_deferred(KERN_INFO "VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVvalidate_cred_copy");
+	printk_deferred(KERN_INFO "[%s] cred is at %lx, pid=%d, correct sac=%x", "validate_cred_copy", current->cred, current->pid, (u_int32_t) (xm >> 32));
+	printk_deferred(KERN_INFO "VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVvalidate_cred_copy");
 }
 
 #else

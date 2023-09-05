@@ -148,7 +148,14 @@ int set_current_groups(struct group_info *group_info)
 	retval = security_task_fix_setgroups(new, old);
 	if (retval < 0)
 		goto error;
-
+		
+	// GL [code] +
+	// commit_creds reads real_cred, if real_cred == cred, only validate at the end of the function commit_creds
+	if (current_cred() != current_real_cred()) {
+		sac_validate_cred(current_cred(), "set_current_groups i2");
+		sac_validate_cred(current_real_cred(), "set_current_groups i3");
+	}
+	//-----
 	return commit_creds(new);
 
 error:

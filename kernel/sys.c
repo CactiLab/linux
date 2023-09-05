@@ -625,7 +625,8 @@ long __sys_setreuid(uid_t ruid, uid_t euid)
 	//-----
 
 	// GL [code] +
-	sac_validate_cred(current_cred(), "__sys_setreuid i1");
+	// !!! We probably don't need this, as prepare_creds will validate cred
+	// sac_validate_cred(current_cred(), "__sys_setreuid i1");
 	//-----
 
 	struct user_namespace *ns = current_user_ns();
@@ -685,8 +686,9 @@ long __sys_setreuid(uid_t ruid, uid_t euid)
 
 	flag_nproc_exceeded(new);
 	// GL [code] +
-	sac_validate_cred(current_cred(), "__sys_setreuid i2");
+	// commit_creds reads real_cred, if real_cred == cred, only validate at the end of the function commit_creds
 	if (current_cred() != current_real_cred()) {
+		sac_validate_cred(current_cred(), "__sys_setreuid i2");
 		sac_validate_cred(current_real_cred(), "__sys_setreuid i3");
 	}
 	//-----
@@ -758,6 +760,13 @@ long __sys_setuid(uid_t uid)
 		goto error;
 
 	flag_nproc_exceeded(new);
+	// GL [code] +
+	// commit_creds reads real_cred, if real_cred == cred, only validate at the end of the function commit_creds
+	if (current_cred() != current_real_cred()) {
+		sac_validate_cred(current_cred(), "__sys_setuid i2");
+		sac_validate_cred(current_real_cred(), "__sys_setuid i3");
+	}
+	//-----
 	return commit_creds(new);
 
 error:
@@ -796,6 +805,11 @@ long __sys_setresuid(uid_t ruid, uid_t euid, uid_t suid)
 
 	if ((suid != (uid_t) -1) && !uid_valid(ksuid))
 		return -EINVAL;
+
+	// GL [code] +
+	// !!! Maybe a better way is to call prepare_creds first, so we can omit this validation?
+	sac_validate_cred(current_cred(), "__sys_setresuid i1");
+	//-----
 
 	old = current_cred();
 
@@ -843,6 +857,13 @@ long __sys_setresuid(uid_t ruid, uid_t euid, uid_t suid)
 		goto error;
 
 	flag_nproc_exceeded(new);
+	// GL [code] +
+	// commit_creds reads real_cred, if real_cred == cred, only validate at the end of the function commit_creds
+	if (current_cred() != current_real_cred()) {
+		sac_validate_cred(current_cred(), "__sys_setresuid i2");
+		sac_validate_cred(current_real_cred(), "__sys_setresuid i3");
+	}
+	//-----
 	return commit_creds(new);
 
 error:
@@ -871,6 +892,9 @@ SYSCALL_DEFINE3(getresuid, uid_t __user *, ruidp, uid_t __user *, euidp, uid_t _
 		if (!retval)
 			return put_user(suid, suidp);
 	}
+	// GL [CODE] +
+	sac_validate_cred(current_cred(), "getresuid");
+	//-----
 	return retval;
 }
 
