@@ -1917,6 +1917,28 @@ config ARM64_PTR_AUTH_KERNEL
 	  This feature works with FUNCTION_GRAPH_TRACER option only if
 	  DYNAMIC_FTRACE_WITH_ARGS is enabled.
 
+config ARM64_PTR_AUTH_CRED_PROTECT
+	bool "Use PA to protect cred structure"
+	default n
+	depends on ARM64_PTR_AUTH_KERNEL
+	help
+	  Enable to protect credentials employing PA.
+
+config ARM64_PTR_AUTH_CRED_PROTECT_CRED
+	bool "Use PA to protect cred structure"
+	default n
+	depends on ARM64_PTR_AUTH_CRED_PROTECT
+	help
+	  When enabled, the cred structure will be protected by PA.
+
+
+config ARM64_PTR_AUTH_CRED_PROTECT_GROUP_INFO
+	bool "Use PA to protect group_info structure"
+	default n
+	depends on ARM64_PTR_AUTH_CRED_PROTECT
+	help
+	  When enabled, the group_info structure will be protected by PA.
+
 config CC_HAS_BRANCH_PROT_PAC_RET
 	# GCC 9 or later, clang 8 or later
 	def_bool $(cc-option,-mbranch-protection=pac-ret+leaf)
