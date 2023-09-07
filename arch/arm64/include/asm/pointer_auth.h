@@ -52,12 +52,24 @@ do {								\
 
 struct ptrauth_keys_kernel {
 	struct ptrauth_key apia;
+	// GL [CODE_PAGA] +
+#ifdef CONFIG_ARM64_PTR_AUTH_KERNEL_PAGA
+	struct ptrauth_key apga;
+#endif
+	//-----
 };
 
 static __always_inline void ptrauth_keys_init_kernel(struct ptrauth_keys_kernel *keys)
 {
 	if (system_supports_address_auth())
 		get_random_bytes(&keys->apia, sizeof(keys->apia));
+	// GL [CODE_PAGA] +
+#ifdef CONFIG_ARM64_PTR_AUTH_KERNEL_PAGA
+	// can't be a hard-coded literal value in the prototype
+	keys->apga.lo = 0x12345678;
+	keys->apga.hi = 0x87654321;
+#endif
+	//-----
 }
 
 static __always_inline void ptrauth_keys_switch_kernel(struct ptrauth_keys_kernel *keys)
@@ -66,6 +78,11 @@ static __always_inline void ptrauth_keys_switch_kernel(struct ptrauth_keys_kerne
 		return;
 
 	__ptrauth_key_install_nosync(APIA, keys->apia);
+	// GL [CODE_PAGA] +
+#ifdef CONFIG_ARM64_PTR_AUTH_KERNEL_PAGA
+	__ptrauth_key_install_nosync(APGA, keys->apga);
+#endif
+	//-----
 	isb();
 }
 
@@ -78,9 +95,15 @@ static inline void ptrauth_keys_install_user(struct ptrauth_keys_user *keys)
 		__ptrauth_key_install_nosync(APDA, keys->apda);
 		__ptrauth_key_install_nosync(APDB, keys->apdb);
 	}
-
+	// GL [CODE_PAGA] original
 	if (system_supports_generic_auth())
 		__ptrauth_key_install_nosync(APGA, keys->apga);
+	// GL [CODE_PAGA] modify
+#ifdef CONFIG_ARM64_PTR_AUTH_KERNEL_PAGA
+	if (system_supports_generic_auth())
+		__ptrauth_key_install_nosync(APGA, keys->apga);
+#endif
+	//-----
 }
 
 static inline void ptrauth_keys_init_user(struct ptrauth_keys_user *keys)

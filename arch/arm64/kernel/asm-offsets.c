@@ -185,6 +185,11 @@ int main(void)
   DEFINE(PTRAUTH_USER_KEY_APIA,		offsetof(struct ptrauth_keys_user, apia));
 #ifdef CONFIG_ARM64_PTR_AUTH_KERNEL
   DEFINE(PTRAUTH_KERNEL_KEY_APIA,	offsetof(struct ptrauth_keys_kernel, apia));
+  // GL [DEBUG_PAGA] +
+#ifdef CONFIG_ARM64_PTR_AUTH_KERNEL_PAGA
+  DEFINE(PTRAUTH_KERNEL_KEY_APGA,	offsetof(struct ptrauth_keys_kernel, apga));
+#endif
+  //-----
 #endif
   BLANK();
 #endif
