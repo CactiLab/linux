@@ -1058,6 +1058,17 @@ struct task_struct {
 	/* Effective (overridable) subjective task credentials (COW): */
 	const struct cred __rcu		*cred;
 
+#ifdef CONFIG_ARM64_PTR_AUTH_CRED_PROTECT_CRED
+	/* Checksum of address and SAC of ptracer_cred */
+	u_int32_t sac_ptracer_cred;
+
+	/* Checksum of address and SAC of real_cred */
+	u_int32_t sac_real_cred;
+	
+	/* Checksum of address and SAC of_cred */
+	u_int32_t sac_cred;
+#endif
+
 #ifdef CONFIG_KEYS
 	/* Cached requested key. */
 	struct key			*cached_requested_key;

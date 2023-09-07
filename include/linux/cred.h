@@ -150,6 +150,9 @@ struct cred {
 		int non_rcu;			/* Can we skip RCU deletion? */
 		struct rcu_head	rcu;		/* RCU deletion hook */
 	};
+#ifdef CONFIG_ARM64_PTR_AUTH_CRED_PROTECT_CRED
+	u_int32_t sac;	/* Structure authentication code (checksum of this structure) */
+#endif
 } __randomize_layout;
 
 extern void __put_cred(struct cred *);
