@@ -1917,6 +1917,14 @@ config ARM64_PTR_AUTH_KERNEL
 	  This feature works with FUNCTION_GRAPH_TRACER option only if
 	  DYNAMIC_FTRACE_WITH_ARGS is enabled.
 
+config ARM64_PTR_AUTH_KERNEL_PAGA
+	bool "Add PAGA key to pointer authentication for kernel"
+	default n
+	depends on ARM64_PTR_AUTH_KERNEL
+	help
+	  When enabled, PAGA key will be added to pointer authentication for kerenl, 
+	  like PAIA key. The key will remain constant through out the kernel running.
+
 config ARM64_PTR_AUTH_CRED_PROTECT
 	bool "Use PA to protect cred structure"
 	default n
