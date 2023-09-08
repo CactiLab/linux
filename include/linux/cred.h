@@ -15,6 +15,9 @@
 #include <linux/uidgid.h>
 #include <linux/sched.h>
 #include <linux/sched/user.h>
+// GL [CODE_CRED] +
+#include <linux/cred_sign.h>
+//-----
 
 struct cred;
 struct inode;
@@ -429,5 +432,182 @@ do {						\
 	*(_fsuid) = __cred->fsuid;		\
 	*(_fsgid) = __cred->fsgid;		\
 } while(0)
+
+// GL [DEBUG] +
+static void print_task_cred(struct task_struct *task, char *symbol) {
+	printk_deferred(KERN_INFO "=================task cred=================%s\n", symbol);
+	printk_deferred(KERN_INFO "Task = %lx, PID=%d", task, task->pid);
+	printk_deferred(KERN_INFO "task->ptracer_cred = %lx", task->ptracer_cred);
+	printk_deferred(KERN_INFO "task->real_cred = %lx", task->real_cred);
+	printk_deferred(KERN_INFO "task->cred = %lx", task->cred);
+	printk_deferred(KERN_INFO "task->sac_ptracer_cred = %x", task->sac_ptracer_cred);
+	printk_deferred(KERN_INFO "task->sac_real_cred = %x", task->sac_real_cred);
+	printk_deferred(KERN_INFO "task->sac_cred = %x", task->sac_cred);
+	printk_deferred(KERN_INFO "=================----=================\n");
+}
+//-----
+
+// GL [CODE_CRED] +
+#ifdef CONFIG_ARM64_PTR_AUTH_CRED_PROTECT_CRED
+
+enum enum_task_cred{
+	PTRACER_CRED,
+	REAL_CRED,
+	CRED
+};
+
+/**
+ * get_cred_sac - Calculate structure authentication code (SAC) for struct cred in a task_struct
+ * 
+ * @task The pointer to the task_struct structure, it won't be changed
+ * @cred ptracer_cred, real_cred, or cred, it won't be changed
+ * 
+ * Only some fields of struct cred will be used for calculating SAC.
+ * The initial value of context of PACGA is the address of task_struct.
+ * The previous result of PACGA will be the context for the next PACGA.
+ * 
+ * Return the 32 bits of SAC
+ * If the cred is NULL, reutrn 0
+*/
+static inline __attribute__((always_inline)) u_int32_t get_cred_sac(const struct task_struct *task, const struct cred *cred) {
+	if (!cred || !task)
+		return 0;
+	u_int64_t xm = (u_int64_t) task;
+	xm = get_cred_field_pac((u_int64_t) cred, sizeof(u_int64_t), xm);
+	xm = get_cred_field_pac(&cred->uid.val, sizeof(cred->uid.val), xm);
+	xm = get_cred_field_pac(&cred->gid.val, sizeof(cred->gid.val), xm);
+	xm = get_cred_field_pac(&cred->suid.val, sizeof(cred->suid.val), xm);
+	xm = get_cred_field_pac(&cred->sgid.val, sizeof(cred->sgid.val), xm);
+	xm = get_cred_field_pac(&cred->euid.val, sizeof(cred->euid.val), xm);
+	xm = get_cred_field_pac(&cred->egid.val, sizeof(cred->egid.val), xm);
+	xm = get_cred_field_pac(&cred->fsuid.val, sizeof(cred->fsuid.val), xm);
+	xm = get_cred_field_pac(&cred->fsgid.val, sizeof(cred->fsgid.val), xm);
+	xm = get_cred_field_pac(&cred->securebits, sizeof(cred->securebits), xm);
+	xm = get_cred_field_pac(&cred->cap_inheritable.val, sizeof(cred->cap_inheritable.val), xm);
+	xm = get_cred_field_pac(&cred->cap_permitted.val, sizeof(cred->cap_permitted.val), xm);
+	xm = get_cred_field_pac(&cred->cap_effective.val, sizeof(cred->cap_effective.val), xm);
+	xm = get_cred_field_pac(&cred->cap_bset.val, sizeof(cred->cap_bset.val), xm);
+	xm = get_cred_field_pac(&cred->cap_ambient.val, sizeof(cred->cap_ambient.val), xm);
+#ifdef CONFIG_KEYS
+	xm = get_cred_field_pac(&cred->jit_keyring, sizeof(cred->jit_keyring), xm);
+	xm = get_cred_field_pac(&cred->session_keyring, sizeof(cred->session_keyring), xm);
+	xm = get_cred_field_pac(&cred->process_keyring, sizeof(cred->process_keyring), xm);
+	xm = get_cred_field_pac(&cred->thread_keyring, sizeof(cred->thread_keyring), xm);
+	xm = get_cred_field_pac(&cred->request_key_auth, sizeof(cred->request_key_auth), xm);
+#endif
+#ifdef CONFIG_SECURITY
+	xm = get_cred_field_pac(&cred->security, sizeof(cred->security), xm);
+#endif
+	xm = get_cred_field_pac(&cred->user, sizeof(cred->user), xm);
+	xm = get_cred_field_pac(&cred->user_ns, sizeof(cred->user_ns), xm);
+	xm = get_cred_field_pac(&cred->ucounts, sizeof(cred->ucounts), xm);
+	xm = get_cred_field_pac(&cred->group_info, sizeof(cred->group_info), xm);
+	xm = get_cred_field_pac(&cred->rcu.next, sizeof(cred->rcu.next), xm);
+	xm = get_cred_field_pac(&cred->rcu.func, sizeof(cred->rcu.func), xm);
+	
+	return xm >> 32;
+}
+
+/**
+ * sac_sign_cred - Sign a cred structure
+ * 
+ * @task The pointer to the task_struct structure
+ * @cred_type ptracer_cred, real_cred, or cred
+ * @info for debug only
+ * 
+ * Nothing will return, but the "sac" filed in cred will be changd
+*/
+static inline __attribute__((always_inline)) void sac_sign_cred(struct task_struct *task, enum enum_task_cred cred_type, char *info) {
+	struct cred *cred = NULL;
+	u_int32_t *cred_sac = NULL;
+	switch (cred_type) {
+		case PTRACER_CRED:
+			cred = task->ptracer_cred;
+			cred_sac = &task->sac_ptracer_cred;
+			break;
+		case REAL_CRED:
+			cred = task->real_cred;
+			cred_sac = &task->sac_real_cred;
+			break;
+		case CRED:
+			cred = task->cred;
+			cred_sac = &task->sac_cred;
+			break;
+		default:
+			break;
+	}
+	if (!cred)
+		return;
+	u_int32_t sac = get_cred_sac(task, cred);
+	*cred_sac = sac;
+	printk_deferred(KERN_INFO "SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS$s", info);
+	print_task_cred(current, info);
+	printk_deferred(KERN_INFO "correct SAC = %x", sac);
+	// printk_deferred(KERN_INFO "[%s] cred is at %lx, pid=%d, correct sac=%x", info, cred, current->pid, sac);
+	// my_print_cred_values_by_pointer(cred, "Sign");
+	printk_deferred(KERN_INFO "SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS$s", info);
+}
+
+/**
+ * sac_validate_cred - Validate the SAC of a cred structure
+ * 
+ * @cred is the point to the credential structure, it won't be changed
+ * 
+ * Calculate the SAC again.
+ * 
+ * Return the address of cred if matched; kerenl panic will be triggered if not mathced
+*/
+static inline __attribute__((always_inline)) struct cred * sac_validate_cred(struct task_struct *task, enum enum_task_cred cred_type, char *info) {
+	struct cred *cred = NULL;
+	u_int32_t *cred_sac = NULL;
+	switch (cred_type) {
+		case PTRACER_CRED:
+			cred = task->ptracer_cred;
+			cred_sac = &task->sac_ptracer_cred;
+			break;
+		case REAL_CRED:
+			cred = task->real_cred;
+			cred_sac = &task->sac_real_cred;
+			break;
+		case CRED:
+			cred = task->cred;
+			cred_sac = &task->sac_cred;
+			break;
+		default:
+			break;
+	}
+	if (!cred)
+		return;
+	u_int32_t sac = get_cred_sac(task, cred);
+	if (*cred_sac == sac) {
+		printk_deferred(KERN_INFO "VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV$s", info);
+		// printk_deferred(KERN_INFO "[%s] cred is at %lx, pid=%d, correct sac=%x", info, cred, current->pid, sac);
+		print_task_cred(current, info);
+		printk_deferred(KERN_INFO "VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV$s", info);
+			return cred;
+	}
+	// panic("Cred struct (%p) integirty check failed\n", cred);
+	printk_deferred(KERN_INFO "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+	// printk_deferred(KERN_INFO "[%s] cred is at %lx, pid=%d, correct sac=%x", info, cred, current->pid, sac);
+	// my_print_cred_values_by_pointer(cred, "Validation Error");
+	print_task_cred(current, info);
+	printk_deferred(KERN_INFO "correct SAC = %x", sac);
+	printk_deferred(KERN_INFO "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+	// panic("[%s] Cred struct (%p) integirty check failed\n", info, cred);
+	return cred;
+}
+
+
+#else
+
+static void sac_sign_cred(struct cred *) {
+
+}
+
+static struct cred * sac_validate_cred(const struct cred *c, char *info) {
+	return c;
+}
+#endif
+//-----
 
 #endif /* _LINUX_CRED_H */

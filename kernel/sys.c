@@ -528,6 +528,9 @@ static void flag_nproc_exceeded(struct cred *new)
  */
 long __sys_setreuid(uid_t ruid, uid_t euid)
 {
+	// GL [DEBUG] +
+	// my_print_keys("setreuid");
+	//-----
 	struct user_namespace *ns = current_user_ns();
 	const struct cred *old;
 	struct cred *new;

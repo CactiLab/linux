@@ -1060,6 +1060,10 @@ void start_kernel(void)
 	taskstats_init_early();
 	delayacct_init();
 
+	// GL [DEBUG] +
+	// my_print_keys("start_kernel");
+	//-----
+
 	acpi_subsystem_init();
 	arch_post_acpi_subsys_init();
 	kcsan_init();
