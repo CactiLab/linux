@@ -473,37 +473,37 @@ static inline __attribute__((always_inline)) u_int32_t get_cred_sac(const struct
 	if (!cred || !task)
 		return 0;
 	u_int64_t xm = (u_int64_t) task;
-	xm = get_cred_field_pac((u_int64_t) cred, sizeof(u_int64_t), xm);
-	xm = get_cred_field_pac(&cred->uid.val, sizeof(cred->uid.val), xm);
-	xm = get_cred_field_pac(&cred->gid.val, sizeof(cred->gid.val), xm);
-	xm = get_cred_field_pac(&cred->suid.val, sizeof(cred->suid.val), xm);
-	xm = get_cred_field_pac(&cred->sgid.val, sizeof(cred->sgid.val), xm);
-	xm = get_cred_field_pac(&cred->euid.val, sizeof(cred->euid.val), xm);
-	xm = get_cred_field_pac(&cred->egid.val, sizeof(cred->egid.val), xm);
-	xm = get_cred_field_pac(&cred->fsuid.val, sizeof(cred->fsuid.val), xm);
-	xm = get_cred_field_pac(&cred->fsgid.val, sizeof(cred->fsgid.val), xm);
-	xm = get_cred_field_pac(&cred->securebits, sizeof(cred->securebits), xm);
-	xm = get_cred_field_pac(&cred->cap_inheritable.val, sizeof(cred->cap_inheritable.val), xm);
-	xm = get_cred_field_pac(&cred->cap_permitted.val, sizeof(cred->cap_permitted.val), xm);
-	xm = get_cred_field_pac(&cred->cap_effective.val, sizeof(cred->cap_effective.val), xm);
-	xm = get_cred_field_pac(&cred->cap_bset.val, sizeof(cred->cap_bset.val), xm);
-	xm = get_cred_field_pac(&cred->cap_ambient.val, sizeof(cred->cap_ambient.val), xm);
+	xm = get_pac_bytes((u_int64_t) cred, sizeof(u_int64_t), xm);
+	xm = get_pac_bytes(&cred->uid.val, sizeof(cred->uid.val), xm);
+	xm = get_pac_bytes(&cred->gid.val, sizeof(cred->gid.val), xm);
+	xm = get_pac_bytes(&cred->suid.val, sizeof(cred->suid.val), xm);
+	xm = get_pac_bytes(&cred->sgid.val, sizeof(cred->sgid.val), xm);
+	xm = get_pac_bytes(&cred->euid.val, sizeof(cred->euid.val), xm);
+	xm = get_pac_bytes(&cred->egid.val, sizeof(cred->egid.val), xm);
+	xm = get_pac_bytes(&cred->fsuid.val, sizeof(cred->fsuid.val), xm);
+	xm = get_pac_bytes(&cred->fsgid.val, sizeof(cred->fsgid.val), xm);
+	xm = get_pac_bytes(&cred->securebits, sizeof(cred->securebits), xm);
+	xm = get_pac_bytes(&cred->cap_inheritable.val, sizeof(cred->cap_inheritable.val), xm);
+	xm = get_pac_bytes(&cred->cap_permitted.val, sizeof(cred->cap_permitted.val), xm);
+	xm = get_pac_bytes(&cred->cap_effective.val, sizeof(cred->cap_effective.val), xm);
+	xm = get_pac_bytes(&cred->cap_bset.val, sizeof(cred->cap_bset.val), xm);
+	xm = get_pac_bytes(&cred->cap_ambient.val, sizeof(cred->cap_ambient.val), xm);
 #ifdef CONFIG_KEYS
-	xm = get_cred_field_pac(&cred->jit_keyring, sizeof(cred->jit_keyring), xm);
-	xm = get_cred_field_pac(&cred->session_keyring, sizeof(cred->session_keyring), xm);
-	xm = get_cred_field_pac(&cred->process_keyring, sizeof(cred->process_keyring), xm);
-	xm = get_cred_field_pac(&cred->thread_keyring, sizeof(cred->thread_keyring), xm);
-	xm = get_cred_field_pac(&cred->request_key_auth, sizeof(cred->request_key_auth), xm);
+	xm = get_pac_bytes(&cred->jit_keyring, sizeof(cred->jit_keyring), xm);
+	xm = get_pac_bytes(&cred->session_keyring, sizeof(cred->session_keyring), xm);
+	xm = get_pac_bytes(&cred->process_keyring, sizeof(cred->process_keyring), xm);
+	xm = get_pac_bytes(&cred->thread_keyring, sizeof(cred->thread_keyring), xm);
+	xm = get_pac_bytes(&cred->request_key_auth, sizeof(cred->request_key_auth), xm);
 #endif
 #ifdef CONFIG_SECURITY
-	xm = get_cred_field_pac(&cred->security, sizeof(cred->security), xm);
+	xm = get_pac_bytes(&cred->security, sizeof(cred->security), xm);
 #endif
-	xm = get_cred_field_pac(&cred->user, sizeof(cred->user), xm);
-	xm = get_cred_field_pac(&cred->user_ns, sizeof(cred->user_ns), xm);
-	xm = get_cred_field_pac(&cred->ucounts, sizeof(cred->ucounts), xm);
-	xm = get_cred_field_pac(&cred->group_info, sizeof(cred->group_info), xm);
-	xm = get_cred_field_pac(&cred->rcu.next, sizeof(cred->rcu.next), xm);
-	xm = get_cred_field_pac(&cred->rcu.func, sizeof(cred->rcu.func), xm);
+	xm = get_pac_bytes(&cred->user, sizeof(cred->user), xm);
+	xm = get_pac_bytes(&cred->user_ns, sizeof(cred->user_ns), xm);
+	xm = get_pac_bytes(&cred->ucounts, sizeof(cred->ucounts), xm);
+	xm = get_pac_bytes(&cred->group_info, sizeof(cred->group_info), xm);
+	xm = get_pac_bytes(&cred->rcu.next, sizeof(cred->rcu.next), xm);
+	xm = get_pac_bytes(&cred->rcu.func, sizeof(cred->rcu.func), xm);
 	
 	return xm >> 32;
 }
@@ -540,12 +540,12 @@ static inline __attribute__((always_inline)) void sac_sign_cred(struct task_stru
 		return;
 	u_int32_t sac = get_cred_sac(task, cred);
 	*cred_sac = sac;
-	printk_deferred(KERN_INFO "SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS$s", info);
+	printk_deferred(KERN_INFO "SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS%s", info);
 	print_task_cred(current, info);
 	printk_deferred(KERN_INFO "correct SAC = %x", sac);
 	// printk_deferred(KERN_INFO "[%s] cred is at %lx, pid=%d, correct sac=%x", info, cred, current->pid, sac);
 	// my_print_cred_values_by_pointer(cred, "Sign");
-	printk_deferred(KERN_INFO "SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS$s", info);
+	printk_deferred(KERN_INFO "SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS%s", info);
 }
 
 /**
@@ -580,19 +580,19 @@ static inline __attribute__((always_inline)) struct cred * sac_validate_cred(str
 		return;
 	u_int32_t sac = get_cred_sac(task, cred);
 	if (*cred_sac == sac) {
-		printk_deferred(KERN_INFO "VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV$s", info);
+		printk_deferred(KERN_INFO "VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV%s", info);
 		// printk_deferred(KERN_INFO "[%s] cred is at %lx, pid=%d, correct sac=%x", info, cred, current->pid, sac);
 		print_task_cred(current, info);
-		printk_deferred(KERN_INFO "VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV$s", info);
+		printk_deferred(KERN_INFO "VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV%s", info);
 			return cred;
 	}
 	// panic("Cred struct (%p) integirty check failed\n", cred);
-	printk_deferred(KERN_INFO "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+	printk_deferred(KERN_INFO "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX%s", info);
 	// printk_deferred(KERN_INFO "[%s] cred is at %lx, pid=%d, correct sac=%x", info, cred, current->pid, sac);
 	// my_print_cred_values_by_pointer(cred, "Validation Error");
 	print_task_cred(current, info);
 	printk_deferred(KERN_INFO "correct SAC = %x", sac);
-	printk_deferred(KERN_INFO "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+	printk_deferred(KERN_INFO "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX%s", info);
 	// panic("[%s] Cred struct (%p) integirty check failed\n", info, cred);
 	return cred;
 }
