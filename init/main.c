@@ -1042,6 +1042,9 @@ void start_kernel(void)
 #endif
 	thread_stack_cache_init();
 	cred_init();
+	sac_sign_cred(current, CRED, "start_kernel cred");
+	sac_sign_cred(current, REAL_CRED, "start_kernel cred");
+	sac_sign_cred(current, PTRACER_CRED, "start_kernel cred");
 	fork_init();
 	proc_caches_init();
 	uts_ns_init();
