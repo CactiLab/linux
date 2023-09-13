@@ -1,8 +1,8 @@
 // GL [CODE_CRED] +
-#ifdef CONFIG_ARM64_PTR_AUTH_CRED_PROTECT
-
 #ifndef _LINUX_CRED_SIGN_H
 #define _LINUX_CRED_SIGN_H
+
+#ifdef CONFIG_ARM64_PTR_AUTH_CRED_PROTECT
 
 /**
  * get_pac_bytes - Calculate pointer authentication code using ARMv8.3a PACGA instruction
