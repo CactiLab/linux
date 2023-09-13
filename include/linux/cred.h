@@ -155,7 +155,7 @@ struct cred {
 	};
 	// GL [CODE_CRED] +
 #ifdef CONFIG_ARM64_PTR_AUTH_CRED_PROTECT_CRED
-	u_int32_t sac;	/* Structure authentication code (checksum of this structure) */
+	u_int64_t sac;	/* Structure authentication code (checksum of this structure) */
 #endif
 	//-----
 } __randomize_layout;
@@ -165,7 +165,12 @@ extern void exit_creds(struct task_struct *);
 extern int copy_creds(struct task_struct *, unsigned long);
 extern const struct cred *get_task_cred(struct task_struct *);
 extern struct cred *cred_alloc_blank(void);
-extern struct cred *prepare_creds(void);
+// GL [CODE_CRED] original
+// extern struct cred *prepare_creds(void);
+// GL [CODE_CRED] modify
+extern struct cred *prepare_creds_with_arg(struct task_struct *);
+#define prepare_creds() prepare_creds_with_arg(current)
+//-----
 extern struct cred *prepare_exec_creds(void);
 extern int commit_creds(struct cred *);
 extern void abort_creds(struct cred *);
@@ -473,7 +478,8 @@ static inline __attribute__((always_inline)) u_int32_t get_cred_sac(const struct
 	if (!cred || !task)
 		return 0;
 	u_int64_t xm = (u_int64_t) task;
-	xm = get_pac_bytes((u_int64_t) cred, sizeof(u_int64_t), xm);
+	u_int64_t xn = (u_int64_t) cred;
+	xm = get_pac_bytes(&xn, sizeof(u_int64_t), xm);
 	xm = get_pac_bytes(&cred->uid.val, sizeof(cred->uid.val), xm);
 	xm = get_pac_bytes(&cred->gid.val, sizeof(cred->gid.val), xm);
 	xm = get_pac_bytes(&cred->suid.val, sizeof(cred->suid.val), xm);
