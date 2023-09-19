@@ -1042,9 +1042,27 @@ void start_kernel(void)
 #endif
 	thread_stack_cache_init();
 	cred_init();
+	// GL [CODE_CRED] +
 	sac_sign_cred(current, CRED, "start_kernel cred");
 	sac_sign_cred(current, REAL_CRED, "start_kernel cred");
 	sac_sign_cred(current, PTRACER_CRED, "start_kernel cred");
+	//-----
+	// GL [DEBUG] +
+	// struct cred *abb = current->cred;
+	// abb->uid.val = 9;
+	struct cred c;
+	validate_sign_copy_cred(current, current, current->cred, &c);
+	printk_deferred(KERN_INFO "atomic_t: %d", sizeof(current->cred->usage));
+	printk_deferred(KERN_INFO "unsigned: %d", sizeof(unsigned));
+	printk_deferred(KERN_INFO "uid: %d", sizeof(current->cred->uid.val));
+	printk_deferred(KERN_INFO "gid: %d", sizeof(current->cred->gid.val));
+	printk_deferred(KERN_INFO "int: %d", sizeof(int));
+	printk_deferred(KERN_INFO "rcu: %d", sizeof(current->cred->rcu));
+	printk_deferred(KERN_INFO "rcu.next: %d", sizeof(current->cred->rcu.next));
+	printk_deferred(KERN_INFO "rcu.func: %d", sizeof(current->cred->rcu.func));
+	printk_deferred(KERN_INFO "void*: %d", sizeof(current->cred->security));
+	printk_deferred(KERN_INFO "cap: %d", sizeof(current->cred->cap_bset));
+	//-----
 	fork_init();
 	proc_caches_init();
 	uts_ns_init();
