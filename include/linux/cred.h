@@ -458,7 +458,8 @@ static void print_task_cred(struct task_struct *task, char *symbol) {
 enum enum_task_cred{
 	PTRACER_CRED,
 	REAL_CRED,
-	CRED
+	CRED,
+	CRED_AUX
 };
 
 /**
@@ -539,6 +540,10 @@ static inline __attribute__((always_inline)) void sac_sign_cred(struct task_stru
 			cred = task->cred;
 			cred_sac = &task->sac_cred;
 			break;
+		case CRED_AUX:
+			cred = task->cred;
+			cred_sac = &task->sac_aux;
+			break;
 		default:
 			break;
 	}
@@ -578,6 +583,10 @@ static inline __attribute__((always_inline)) struct cred * sac_validate_cred(str
 		case CRED:
 			cred = task->cred;
 			cred_sac = &task->sac_cred;
+			break;
+		case CRED_AUX:
+			cred = task->cred;
+			cred_sac = &task->sac_aux;
 			break;
 		default:
 			break;

@@ -235,6 +235,215 @@ error:
 	return NULL;
 }
 
+// GL [CODE_CRED] +
+
+#define AAAAA asm volatile( \
+	"PACGA x10, x11, x12\n\t"	\
+	:							\
+	:							\
+	: "x10", "x11", "x12"		\
+);								\
+
+inline __attribute__((always_inline)) void fffff() {
+	printk_deferred(KERN_INFO "abc");
+	AAAAA
+}
+
+inline __attribute__((always_inline)) void get_pac_bytes_reg() {
+
+}
+
+inline __attribute__((always_inline)) void validate_sign_copy_x(u_int64_t *src, u_int64_t *des) {
+	asm volatile(
+		"LDR x10, [%0]\n\t"
+		"PACGA x11, x10, x11\n\t"
+		"PACGA x12, x10, x12\n\t"
+		"STR x10, [%1]\n\t"
+		:
+		: "r" (src), "r" (des)
+		: "x10", "x11", "x12", "memory"
+	);
+}
+
+inline __attribute__((always_inline)) void validate_sign_copy_w(u_int64_t *src, u_int64_t *des) {
+	asm volatile(
+		"MOV x10, #0\n\t"
+		"LDR w10, [%0]\n\t"
+		"PACGA x11, x10, x11\n\t"
+		"PACGA x12, x10, x12\n\t"
+		"STR w10, [%1]\n\t"
+		:
+		: "r" (src), "r" (des)
+		: "x10", "x11", "x12", "memory"
+	);
+}
+
+inline __attribute__((always_inline)) void validate_sign_copy_b(u_int64_t *src, u_int64_t *des) {
+	asm volatile(
+		"MOV x10, #0\n\t"
+		"LDRB w10, [%0]\n\t"
+		"PACGA x11, x10, x11\n\t"
+		"PACGA x12, x10, x12\n\t"
+		"STRB w10, [%1]\n\t"
+		:
+		: "r" (src), "r" (des)
+		: "x10", "x11", "x12", "memory"
+	);
+}
+
+void validate_panic_handler() {
+	printk_deferred(KERN_INFO "aowifjweoiwefjwpoifwjenfo");
+}
+EXPORT_SYMBOL(validate_panic_handler);
+
+void validate_sign_copy_cred(const struct task_struct *src_task, struct task_struct *des_task, const struct cred *src_cred, struct cred *des_cred) {
+	if (!src_task || !des_task || !src_cred || !des_cred)
+		return;
+
+	// register uintptr_t sp asm ("sp");
+
+	// prologue
+	// asm volatile(
+	// 	"SUB %[new_sp], %[old_sp], #48\n\t"
+    //     "STP x10, x11, [%[new_sp], #0]\n\t"
+    //     "STP x12, x13, [%[new_sp], #16]\n\t"
+    //     "STP x14, x15, [%[new_sp], #32]\n\t"
+	// 	: [new_sp] "+r" (sp)
+	// 	: [old_sp] "r" (sp)
+	// 	: "x10", "x11", "x12", "x13", "x14", "x15", "memory"
+	// );
+
+	// printk_deferred(KERN_INFO "src_task=%lx, src_cred=%lx", src_task, src_cred);
+
+	// copy, validate, sing
+	asm volatile(
+		"MOV x11, %0\n\t"
+		"MOV x12, %1\n\t"
+		"MOV x10, %2\n\t"
+		"MOV x13, %3\n\t"
+		"PACGA x11, x10, x11\n\t"
+		"PACGA x12, x13, x12\n\t"
+		:
+		: "r" (src_task), "r" (des_task), "r" (src_cred), "r" (des_cred)
+		: "x10", "x11", "x12", "x13"
+	);
+	validate_sign_copy_w(&src_cred->uid.val, &des_cred->uid.val);
+	validate_sign_copy_w(&src_cred->gid.val, &des_cred->gid.val);
+	validate_sign_copy_w(&src_cred->suid.val, &des_cred->suid.val);
+	validate_sign_copy_w(&src_cred->sgid.val, &des_cred->sgid.val);
+	validate_sign_copy_w(&src_cred->euid.val, &des_cred->euid.val);
+	validate_sign_copy_w(&src_cred->egid.val, &des_cred->egid.val);
+	validate_sign_copy_w(&src_cred->fsuid.val, &des_cred->fsuid.val);
+	validate_sign_copy_w(&src_cred->fsgid.val, &des_cred->fsgid.val);
+	validate_sign_copy_w(&src_cred->securebits, &des_cred->securebits);
+	validate_sign_copy_x(&src_cred->cap_inheritable.val, &des_cred->cap_inheritable.val);
+	validate_sign_copy_x(&src_cred->cap_permitted.val, &des_cred->cap_permitted.val);
+	validate_sign_copy_x(&src_cred->cap_effective.val, &des_cred->cap_effective.val);
+	validate_sign_copy_x(&src_cred->cap_bset.val, &des_cred->cap_bset.val);
+	validate_sign_copy_x(&src_cred->cap_ambient.val, &des_cred->cap_ambient.val);
+#ifdef CONFIG_KEYS
+	validate_sign_copy_b(&src_cred->jit_keyring, &des_cred->jit_keyring);
+	validate_sign_copy_x(&src_cred->session_keyring, &des_cred->session_keyring);
+	validate_sign_copy_x(&src_cred->process_keyring, &des_cred->process_keyring);
+	validate_sign_copy_x(&src_cred->thread_keyring, &des_cred->thread_keyring);
+	validate_sign_copy_x(&src_cred->request_key_auth, &des_cred->request_key_auth);
+#endif
+#ifdef CONFIG_SECURITY
+	validate_sign_copy_x(&src_cred->security, &des_cred->security);
+#endif
+	validate_sign_copy_x(&src_cred->user, &des_cred->user);
+	validate_sign_copy_x(&src_cred->user_ns, &des_cred->user_ns);
+	validate_sign_copy_x(&src_cred->ucounts, &des_cred->ucounts);
+	validate_sign_copy_x(&src_cred->group_info, &des_cred->group_info);
+	validate_sign_copy_x(&src_cred->rcu.next, &des_cred->rcu.next);
+	validate_sign_copy_x(&src_cred->rcu.func, &des_cred->rcu.func);
+
+	// copy fields that don't need to be signed
+	des_cred->usage = src_cred->usage;
+#ifdef CONFIG_DEBUG_CREDENTIALS
+	des_cred->subscribers = src_cred->subscribers;
+	des_cred->put_addr = src_cred->put_addr;
+	des_cred->magic = src_cred->magic;
+#endif
+
+	// debug
+	// asm volatile(
+	// 	"LSR x11, x11, #32\n\t"
+	// 	"STR w11, [%0]\n\t"
+	// 	:
+	// 	: "r" (&des_cred->sac)
+	// 	: "w11"
+	// );
+	// printk_deferred(KERN_INFO "************** PAC = %x, stored PAC = %x, src_task->pid = %d, current -> pid = %d", des_cred->sac, src_task->sac_cred, src_task->pid, current->pid);
+
+	// validate
+	// asm volatile(
+	// 	"LSR x11, x11, #32\n\t"
+	// 	"LDR w13, [%0]\n\t"
+	// 	"CMP w11, w13\n\t"
+	// 	"BNE .Lpanic\n\t"
+	// 	"B .Lend\n\t"
+	// 	".Lpanic\n\t"
+	// 	"bl %[panic_func]\n\t"
+	// 	".Lend:"
+	// 	:
+	// 	: "r"(&src_task->sac_cred), [panic_func] "r" (panic_handler)
+	// 	: "x11", "x13"
+	// );
+
+	// asm volatile(
+	// 	"LSR x11, x11, #32\n\t"
+	// 	"LDR w13, [%0]\n\t"
+	// 	"CMP w11, w13\n\t"
+	// 	"BNE 1f\n\t"          // Use '1f' to represent forward local label.
+	// 	"B 2f\n\t"           // Jump to the end label.
+	// 	"1:\n\t"             // Local label for panic.
+	// 	"bl %[panic_func]\n\t"
+	// 	"2:\n\t"             // Local label for end.
+	// 	:
+	// 	: "r"(&src_task->sac_cred), [panic_func] "r" (validate_panic_handler)
+	// 	: "x11", "x13"
+	// );
+
+	// save SAC of the signed des_cred
+	asm volatile(
+		"LSR x12, x12, #32\n\t"
+		"STR w12, [%0]\n\t"
+		:
+		: "r" (&des_task->sac_aux)
+		: "x12", "memory"
+	);
+	des_task->sac_cred = 0;
+
+	// validate
+	u_int32_t sac;
+	asm volatile(
+		"LSR x11, x11, #32\n\t"
+		"STR w11, [%0]\n\t"
+		:
+		: "r" (&sac)
+		: "x11", "memory"
+	);
+	if (sac != src_task->sac_cred) {
+		// panic("aaa");
+		printk_deferred(KERN_INFO "aaaaaa");
+	}
+
+	// epilogue
+    // asm volatile(
+    //     "LDP x10, x11, [%[sp], #0]\n\t"
+    //     "LDP x12, x13, [%[sp], #16]\n\t"
+    //     "LDP x14, x15, [%[sp], #32]\n\t"
+    //     "ADD %[sp], %[sp], #48\n\t"
+    //     : [sp] "+r" (sp) 
+    //     :
+    //     : "x10", "x11", "x12", "x13", "x14", "x15", "memory"
+    // );
+}
+EXPORT_SYMBOL(validate_sign_copy_cred);
+//-----
+
+// GL [CODE_CRED] original
 /**
  * prepare_creds - Prepare a new set of credentials for modification
  *
@@ -249,9 +458,67 @@ error:
  *
  * Call commit_creds() or abort_creds() to clean up.
  */
-struct cred *prepare_creds(void)
+// struct cred *prepare_creds(void)
+// {
+// 	struct task_struct *task = current;
+// 	const struct cred *old;
+// 	struct cred *new;
+
+// 	validate_process_creds();
+
+// 	new = kmem_cache_alloc(cred_jar, GFP_KERNEL);
+// 	if (!new)
+// 		return NULL;
+
+// 	kdebug("prepare_creds() alloc %p", new);
+
+// 	old = task->cred;
+// 	memcpy(new, old, sizeof(struct cred));
+
+// 	new->non_rcu = 0;
+// 	atomic_set(&new->usage, 1);
+// 	set_cred_subscribers(new, 0);
+// 	get_group_info(new->group_info);
+// 	get_uid(new->user);
+// 	get_user_ns(new->user_ns);
+
+// #ifdef CONFIG_KEYS
+// 	key_get(new->session_keyring);
+// 	key_get(new->process_keyring);
+// 	key_get(new->thread_keyring);
+// 	key_get(new->request_key_auth);
+// #endif
+
+// #ifdef CONFIG_SECURITY
+// 	new->security = NULL;
+// #endif
+
+// 	new->ucounts = get_ucounts(new->ucounts);
+// 	if (!new->ucounts)
+// 		goto error;
+
+// 	if (security_prepare_creds(new, old, GFP_KERNEL_ACCOUNT) < 0)
+// 		goto error;
+
+// 	validate_creds(new);
+// 	return new;
+
+// error:
+// 	abort_creds(new);
+// 	return NULL;
+// }
+// EXPORT_SYMBOL(prepare_creds);
+// GL [CODE_CRED] modify
+struct cred *prepare_creds_with_arg(struct task_struct * task)
 {
-	struct task_struct *task = current;
+	// GL
+	// struct task_struct *task = current;
+	//-----
+	// GL
+	if (!task)
+		return NULL;
+	//-----
+
 	const struct cred *old;
 	struct cred *new;
 
@@ -298,7 +565,8 @@ error:
 	abort_creds(new);
 	return NULL;
 }
-EXPORT_SYMBOL(prepare_creds);
+EXPORT_SYMBOL(prepare_creds_with_arg);
+//-----
 
 /*
  * Prepare credentials for current to perform an execve()
@@ -362,7 +630,11 @@ int copy_creds(struct task_struct *p, unsigned long clone_flags)
 		return 0;
 	}
 
-	new = prepare_creds();
+	// GL [CODE_CRED] original
+	// new = prepare_creds();
+	// GL [CODE_CRED] modify
+	new = prepare_creds_with_arg(p);
+	//-----
 	if (!new)
 		return -ENOMEM;
 

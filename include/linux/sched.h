@@ -1068,6 +1068,8 @@ struct task_struct {
 	
 	/* Checksum of address and SAC of_cred */
 	u_int32_t sac_cred;
+
+	u_int32_t sac_aux;
 #endif
 	//-----
 
