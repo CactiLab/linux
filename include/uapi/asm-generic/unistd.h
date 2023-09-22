@@ -820,8 +820,26 @@ __SYSCALL(__NR_set_mempolicy_home_node, sys_set_mempolicy_home_node)
 #define __NR_cachestat 451
 __SYSCALL(__NR_cachestat, sys_cachestat)
 
+#define __NR_print_current_cred 452
+__SYSCALL(__NR_print_current_cred, sys_print_current_cred)
+
+#define __NR_print_cred 453
+__SYSCALL(__NR_print_cred, sys_print_cred)
+
+#define __NR_myinfoprint 454
+__SYSCALL(__NR_myinfoprint, sys_myinfoprint)
+
+#define __NR_mytouchuid 455
+__SYSCALL(__NR_mytouchuid, sys_mytouchuid)
+
+#define __NR_mytouchreuid 456
+__SYSCALL(__NR_mytouchreuid, sys_mytouchreuid)
+
+#define __NR_mytouchrefsuid 457
+__SYSCALL(__NR_mytouchrefsuid, sys_mytouchrefsuid)
+
 #undef __NR_syscalls
-#define __NR_syscalls 452
+#define __NR_syscalls 458
 
 /*
  * 32 bit systems traditionally used different

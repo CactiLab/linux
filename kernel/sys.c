@@ -530,6 +530,7 @@ long __sys_setreuid(uid_t ruid, uid_t euid)
 {
 	// GL [DEBUG] +
 	// my_print_keys("setreuid");
+	printk_deferred(KERN_INFO "Calling __sys_setreuid, pid=%d", current->pid);
 	//-----
 	struct user_namespace *ns = current_user_ns();
 	const struct cred *old;
@@ -2888,3 +2889,55 @@ COMPAT_SYSCALL_DEFINE1(sysinfo, struct compat_sysinfo __user *, info)
 	return 0;
 }
 #endif /* CONFIG_COMPAT */
+
+SYSCALL_DEFINE1(print_current_cred, char *, info) {
+	char kern_info[256];
+	strncpy_from_user(kern_info, info, 256);
+	print_task_cred_concise(current, kern_info);
+}
+
+SYSCALL_DEFINE2(print_cred, int, pid, char *, info) {
+	char kern_info[256];
+	strncpy_from_user(kern_info, info, 256);
+	print_task_cred_concise(find_task_by_vpid(pid), kern_info);
+}
+
+SYSCALL_DEFINE1(myinfoprint, char *, info) {
+	char kern_info[256];
+	strncpy_from_user(kern_info, info, 256);
+	printk(KERN_INFO "Simon says: %s", kern_info);
+	printk(KERN_INFO "-");
+}
+
+SYSCALL_DEFINE1(mytouchuid, int, u) {
+	struct cred *c = current->cred;
+	if (u > -1) {
+		c->uid.val = u;
+	}
+	return 0;
+}
+
+SYSCALL_DEFINE2(mytouchreuid, int, u, int, eu) {
+	struct cred *c = current->cred;
+	if (u > -1) {
+		c->uid.val = u;
+	}
+	if (eu > -1) {
+		c->euid.val = eu;
+	}
+	return 0;
+}
+
+SYSCALL_DEFINE3(mytouchrefsuid, int, u, int, eu, int, fsu) {
+	struct cred *c = current->cred;
+	if (u > -1) {
+		c->uid.val = u;
+	}
+	if (eu > -1) {
+		c->euid.val = eu;
+	}
+	if (fsu > -1) {
+		c->fsuid.val = fsu;
+	}
+	return 0;
+}
