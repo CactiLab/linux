@@ -440,15 +440,61 @@ do {						\
 
 // GL [DEBUG] +
 static void print_task_cred(struct task_struct *task, char *symbol) {
+	if (!task) {
+		printk_deferred(KERN_INFO "[%s]Task is null\n", symbol);
+		return;
+	}
 	printk_deferred(KERN_INFO "=================task cred=================%s\n", symbol);
-	printk_deferred(KERN_INFO "Task = %lx, PID=%d", task, task->pid);
+	printk_deferred(KERN_INFO "Task = %lx, PID=%d, PPID=%d, name=%s", task, task->pid, task->real_parent->pid, task->comm);
 	printk_deferred(KERN_INFO "task->ptracer_cred = %lx", task->ptracer_cred);
 	printk_deferred(KERN_INFO "task->real_cred = %lx", task->real_cred);
 	printk_deferred(KERN_INFO "task->cred = %lx", task->cred);
 	printk_deferred(KERN_INFO "task->sac_ptracer_cred = %x", task->sac_ptracer_cred);
 	printk_deferred(KERN_INFO "task->sac_real_cred = %x", task->sac_real_cred);
 	printk_deferred(KERN_INFO "task->sac_cred = %x", task->sac_cred);
-	printk_deferred(KERN_INFO "=================----=================\n");
+
+	printk_deferred(KERN_INFO "----------ptracer_cred----------%s\n", symbol);
+	if (task->ptracer_cred) {
+		printk_deferred(KERN_INFO "task->ptracer_cred->usage = %d", task->ptracer_cred->usage);
+		printk_deferred(KERN_INFO "task->ptracer_cred->uid = %d", task->ptracer_cred->uid);
+		printk_deferred(KERN_INFO "task->ptracer_cred->gid = %d", task->ptracer_cred->gid);
+		printk_deferred(KERN_INFO "task->ptracer_cred->euid = %d", task->ptracer_cred->euid);
+		printk_deferred(KERN_INFO "task->ptracer_cred->egid = %d", task->ptracer_cred->egid);
+		printk_deferred(KERN_INFO "task->ptracer_cred->fsuid = %d", task->ptracer_cred->fsuid);
+		printk_deferred(KERN_INFO "task->ptracer_cred->fsgid = %d", task->ptracer_cred->fsgid);
+	}
+	printk_deferred(KERN_INFO "--------------------------------%s\n", symbol);
+
+	printk_deferred(KERN_INFO "----------real_cred----------%s\n", symbol);
+	if (task->real_cred) {
+		printk_deferred(KERN_INFO "task->real_cred->usage = %d", task->real_cred->usage);
+		printk_deferred(KERN_INFO "task->real_cred->uid = %d", task->real_cred->uid);
+		printk_deferred(KERN_INFO "task->real_cred->gid = %d", task->real_cred->gid);
+		printk_deferred(KERN_INFO "task->real_cred->euid = %d", task->real_cred->euid);
+		printk_deferred(KERN_INFO "task->real_cred->egid = %d", task->real_cred->egid);
+		printk_deferred(KERN_INFO "task->real_cred->fsuid = %d", task->real_cred->fsuid);
+		printk_deferred(KERN_INFO "task->real_cred->fsgid = %d", task->real_cred->fsgid);
+
+	}
+	printk_deferred(KERN_INFO "-----------------------------%s\n", symbol);
+
+	printk_deferred(KERN_INFO "----------cred----------%s\n", symbol);
+	if (task->cred) {
+		printk_deferred(KERN_INFO "task->cred->usage = %d", task->cred->usage);
+		printk_deferred(KERN_INFO "task->cred->uid = %d", task->cred->uid);
+		printk_deferred(KERN_INFO "task->cred->gid = %d", task->cred->gid);
+		printk_deferred(KERN_INFO "task->cred->euid = %d", task->cred->euid);
+		printk_deferred(KERN_INFO "task->cred->egid = %d", task->cred->egid);
+		printk_deferred(KERN_INFO "task->cred->fsuid = %d", task->cred->fsuid);
+		printk_deferred(KERN_INFO "task->cred->fsgid = %d", task->cred->fsgid);
+	}
+	printk_deferred(KERN_INFO "------------------------%s\n", symbol);
+	printk_deferred(KERN_INFO "=================----=================%s\n", symbol);
+}
+
+static inline __attribute__((always_inline)) void print_task_cred_concise(struct task_struct *task, char *symbol) {
+	if (task && task->cred)
+		printk_deferred(KERN_INFO "===[%s]===PID is %d===\nptracer:%lx, real:%lx, cred:%lx\ncred->usage=%d, cred->uid=%d, cred->euid=%d, cred->fsuid=%d\n------", symbol, task->pid, task->ptracer_cred, task->real_cred, task->cred, task->cred->usage, task->cred->uid, task->cred->euid, task->cred->fsuid);
 }
 //-----
 
