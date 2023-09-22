@@ -502,6 +502,20 @@ do {									      \
 		smp_store_release(&p, RCU_INITIALIZER((typeof(p))_r_a_p__v)); \
 } while (0)
 
+#define rcu_assign_pointer1(p, v)					      \
+do {									      \
+	uintptr_t _r_a_p__v = (uintptr_t)(v);				      \
+	rcu_check_sparse(p, __rcu);					      \
+									      \
+	if (__builtin_constant_p(v) && (_r_a_p__v) == (uintptr_t)NULL) {	      \
+		WRITE_ONCE((p), (typeof(p))(_r_a_p__v));		      \
+		printk_deferred(KERN_INFO "RCU654321");							\
+	} else {								      \
+		smp_store_release(&p, RCU_INITIALIZER((typeof(p))_r_a_p__v)); \
+		printk_deferred(KERN_INFO "RCU123456");							\
+	}																\
+} while (0)
+
 /**
  * rcu_replace_pointer() - replace an RCU pointer, returning its old value
  * @rcu_ptr: RCU pointer, whose old value is returned
